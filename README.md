@@ -215,6 +215,32 @@ PlayScene::Render()
 → DirectX draw call
 ```
 
+### Render call chain giai đoạn đầu
+
+Ở sample cũ của thầy, lệnh vẽ thường đi theo hướng:
+
+```text
+main.cpp::Render()
+→ CGame::Draw()
+→ ID3DX10Sprite::DrawSpritesImmediate()
+→ SwapChain::Present()
+```
+
+Trong project mới, nhóm mình gom phần đó vào `Core/Renderer`:
+
+```text
+Game::Render()
+→ SceneManager::Render()
+→ PlayScene::Render()
+→ EntityManager::RenderAll()
+→ GameObject::Render()
+→ Sprite/Animation chọn frame cần vẽ
+→ Renderer::DrawSprite()
+→ ID3DX10Sprite::DrawSpritesImmediate()
+```
+
+Ý tưởng chính: `GameObject`, `Mario`, `Goomba`, `Coin` không gọi DirectX trực tiếp. Các object chỉ nói "tôi muốn vẽ sprite này ở tọa độ này"; `Renderer` chịu trách nhiệm biến yêu cầu đó thành draw call.
+
 Sau khi refactor, nếu cần sửa render sprite thì ưu tiên xem:
 
 ```text
