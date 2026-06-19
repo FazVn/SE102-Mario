@@ -1,0 +1,282 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{28C91F22-3E6B-4425-A1C5-9F96E0401313}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{7C399FE9-3B89-49F3-84BF-78E654536302}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects">
+      <UniqueIdentifier>{52FFEA05-7F55-4C55-871D-B86C2FE7FFB2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="World">
+      <UniqueIdentifier>{BC78A04A-1A50-462C-91CB-EFB54D08B32E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Player">
+      <UniqueIdentifier>{7676B9DC-B082-47A5-AA2E-06A1994F7CBC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Enemies">
+      <UniqueIdentifier>{E8746314-7CFD-42D4-BAB1-58145593DC22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Blocks">
+      <UniqueIdentifier>{50E1C728-CFB6-4C60-B339-7CB6FF16D73E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Items">
+      <UniqueIdentifier>{0A807CB0-6EB3-4222-9D24-66BAA6043481}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Environment">
+      <UniqueIdentifier>{DCB19582-7828-4E96-AAF6-9397BD698AC8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{6D5D0952-AF5A-435B-9049-B2DC1FCCC668}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\textures">
+      <UniqueIdentifier>{09C137C9-AB4A-4253-986C-A24F34D23FAD}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\definitions">
+      <UniqueIdentifier>{B3AAA1C8-DCDA-4936-8B67-EADA95594052}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources\levels">
+      <UniqueIdentifier>{E89085FD-55CF-43C2-82E9-60FF20794B5B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{85AD1AFF-CB73-442E-BB12-0C8A99C4F255}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Game.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Input.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Renderer.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\GameOverScene.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\MenuScene.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\PlayScene.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\SceneFactory.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\SceneManager.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\GameObject.cpp">
+      <Filter>Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="World\Level.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Camera.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Texture.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Sprite.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Animation.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\WinScene.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="World\LevelLoader.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\TileMap.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\EntityManager.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\ObjectFactory.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="World\CollisionSystem.cpp">
+      <Filter>World</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Player\Mario.cpp">
+      <Filter>Objects\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Enemies\Enemy.cpp">
+      <Filter>Objects\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Enemies\Goomba.cpp">
+      <Filter>Objects\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Enemies\Koopa.cpp">
+      <Filter>Objects\Enemies</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Blocks\Brick.cpp">
+      <Filter>Objects\Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Blocks\QuestionBlock.cpp">
+      <Filter>Objects\Blocks</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Items\Coin.cpp">
+      <Filter>Objects\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Items\Mushroom.cpp">
+      <Filter>Objects\Items</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Environment\Platform.cpp">
+      <Filter>Objects\Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Environment\Pipe.cpp">
+      <Filter>Objects\Environment</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\Environment\Portal.cpp">
+      <Filter>Objects\Environment</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core\Game.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\GameConfig.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Input.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Renderer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\GameOverScene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\IScene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\MenuScene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\PlayScene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\SceneFactory.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\SceneId.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\SceneManager.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\GameObject.h">
+      <Filter>Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="World\Level.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\RenderOptions.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Camera.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Texture.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Sprite.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Animation.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\WinScene.h">
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="World\LevelLoader.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\TileMap.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\EntityManager.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\ObjectFactory.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="World\CollisionSystem.h">
+      <Filter>World</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Player\Mario.h">
+      <Filter>Objects\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Enemies\Enemy.h">
+      <Filter>Objects\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Enemies\Goomba.h">
+      <Filter>Objects\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Enemies\Koopa.h">
+      <Filter>Objects\Enemies</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Blocks\Brick.h">
+      <Filter>Objects\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Blocks\QuestionBlock.h">
+      <Filter>Objects\Blocks</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Items\Coin.h">
+      <Filter>Objects\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Items\Mushroom.h">
+      <Filter>Objects\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Environment\Platform.h">
+      <Filter>Objects\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Environment\Pipe.h">
+      <Filter>Objects\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Environment\Portal.h">
+      <Filter>Objects\Environment</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\definitions\textures.txt">
+      <Filter>Resources\definitions</Filter>
+    </None>
+    <None Include="Resources\definitions\sprites.txt">
+      <Filter>Resources\definitions</Filter>
+    </None>
+    <None Include="Resources\definitions\animations.txt">
+      <Filter>Resources\definitions</Filter>
+    </None>
+    <None Include="Resources\levels\demo_level.txt">
+      <Filter>Resources\levels</Filter>
+    </None>
+    <None Include="Resources\levels\level_1_1.txt">
+      <Filter>Resources\levels</Filter>
+    </None>
+    <None Include="Resources\textures\.gitkeep">
+      <Filter>Resources\textures</Filter>
+    </None>
+    <None Include="Tests\test_cases.md">
+      <Filter>Tests</Filter>
+    </None>
+    <None Include="Tests\known_bugs.md">
+      <Filter>Tests</Filter>
+    </None>
+  </ItemGroup>
+</Project>
