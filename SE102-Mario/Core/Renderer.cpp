@@ -1,5 +1,31 @@
 #include "Renderer.h"
 
+#include "Sprite.h"
+#include "Texture.h"
+
+#include <algorithm>
+#include <cmath>
+
+#pragma comment(lib, "Msimg32.lib")
+
+namespace
+{
+    HFONT CreateRenderFont(int fontSize, int fontWeight, const wchar_t* fontFamily)
+    {
+        return CreateFontW(fontSize, 0, 0, 0, fontWeight, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
+            OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH,
+            fontFamily ? fontFamily : L"Consolas");
+    }
+
+    void FillBitmap(HDC targetContext, int width, int height, COLORREF color)
+    {
+        RECT rect{ 0, 0, width, height };
+        HBRUSH brush = CreateSolidBrush(color);
+        FillRect(targetContext, &rect, brush);
+        DeleteObject(brush);
+    }
+}
+
 void Renderer::Begin(HWND hwnd, COLORREF clearColor)
 {
     windowHandle = hwnd;
@@ -18,10 +44,135 @@ void Renderer::Begin(HWND hwnd, COLORREF clearColor)
     DeleteObject(brush);
 }
 
-void Renderer::DrawCenteredText(const std::wstring& text, int y, int height, int fontSize, COLORREF color)
+void Renderer::DrawTexture(const Texture& texture, int x, int y, const RECT& sourceRect, const RenderOptions& options)
 {
-    HFONT font = CreateFontW(fontSize, 0, 0, 0, FW_BOLD, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
-        OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Consolas");
+    DrawTexture(texture, x, y, sourceRect, false, RGB(255, 0, 255), options);
+}
+
+void Renderer::DrawTexture(const Texture& texture, int x, int y, const RECT& sourceRect, bool useTransparentColor, COLORREF transparentColor, const RenderOptions& options)
+{
+    if (!backBufferContext || !texture.GetHandle())
+    {
+        return;
+    }
+
+    const int sourceWidth = sourceRect.right - sourceRect.left;
+    const int sourceHeight = sourceRect.bottom - sourceRect.top;
+    if (sourceWidth <= 0 || sourceHeight <= 0)
+    {
+        return;
+    }
+
+    const float scale = options.scale <= 0.0f ? 1.0f : options.scale;
+    const int scaledWidth = static_cast<int>(std::lround(sourceWidth * scale));
+    const int scaledHeight = static_cast<int>(std::lround(sourceHeight * scale));
+    const int destinationWidth = scaledWidth > 1 ? scaledWidth : 1;
+    const int destinationHeight = scaledHeight > 1 ? scaledHeight : 1;
+
+    HDC textureContext = CreateCompatibleDC(backBufferContext);
+    HGDIOBJ oldTextureBitmap = SelectObject(textureContext, texture.GetHandle());
+
+    SetStretchBltMode(backBufferContext, COLORONCOLOR);
+    SetStretchBltMode(textureContext, COLORONCOLOR);
+
+    const bool hasFlip = options.flipX || options.flipY;
+    const BYTE alpha = static_cast<BYTE>(std::clamp(options.alpha, 0.0f, 1.0f) * 255.0f);
+
+    if (useTransparentColor)
+    {
+        if (!hasFlip && alpha == 255)
+        {
+            TransparentBlt(backBufferContext, x, y, destinationWidth, destinationHeight,
+                textureContext, sourceRect.left, sourceRect.top, sourceWidth, sourceHeight, transparentColor);
+        }
+        else
+        {
+            HDC tempContext = CreateCompatibleDC(backBufferContext);
+            HBITMAP tempBitmap = CreateCompatibleBitmap(backBufferContext, destinationWidth, destinationHeight);
+            HGDIOBJ oldTempBitmap = SelectObject(tempContext, tempBitmap);
+            FillBitmap(tempContext, destinationWidth, destinationHeight, transparentColor);
+
+            TransparentBlt(tempContext, 0, 0, destinationWidth, destinationHeight,
+                textureContext, sourceRect.left, sourceRect.top, sourceWidth, sourceHeight, transparentColor);
+
+            HDC drawContext = tempContext;
+            HBITMAP mirroredBitmap = nullptr;
+            HGDIOBJ oldMirroredBitmap = nullptr;
+            HDC mirroredContext = nullptr;
+
+            if (hasFlip)
+            {
+                mirroredContext = CreateCompatibleDC(backBufferContext);
+                mirroredBitmap = CreateCompatibleBitmap(backBufferContext, destinationWidth, destinationHeight);
+                oldMirroredBitmap = SelectObject(mirroredContext, mirroredBitmap);
+                FillBitmap(mirroredContext, destinationWidth, destinationHeight, transparentColor);
+
+                const int drawX = options.flipX ? destinationWidth : 0;
+                const int drawY = options.flipY ? destinationHeight : 0;
+                const int drawWidth = options.flipX ? -destinationWidth : destinationWidth;
+                const int drawHeight = options.flipY ? -destinationHeight : destinationHeight;
+                StretchBlt(mirroredContext, drawX, drawY, drawWidth, drawHeight,
+                    tempContext, 0, 0, destinationWidth, destinationHeight, SRCCOPY);
+
+                drawContext = mirroredContext;
+            }
+
+            TransparentBlt(backBufferContext, x, y, destinationWidth, destinationHeight,
+                drawContext, 0, 0, destinationWidth, destinationHeight, transparentColor);
+
+            if (mirroredContext)
+            {
+                SelectObject(mirroredContext, oldMirroredBitmap);
+                DeleteObject(mirroredBitmap);
+                DeleteDC(mirroredContext);
+            }
+
+            SelectObject(tempContext, oldTempBitmap);
+            DeleteObject(tempBitmap);
+            DeleteDC(tempContext);
+        }
+    }
+    else
+    {
+        const int drawX = options.flipX ? x + destinationWidth : x;
+        const int drawY = options.flipY ? y + destinationHeight : y;
+        const int drawWidth = options.flipX ? -destinationWidth : destinationWidth;
+        const int drawHeight = options.flipY ? -destinationHeight : destinationHeight;
+
+        if (!hasFlip && alpha < 255)
+        {
+            BLENDFUNCTION blend{};
+            blend.BlendOp = AC_SRC_OVER;
+            blend.SourceConstantAlpha = alpha;
+
+            AlphaBlend(backBufferContext, x, y, destinationWidth, destinationHeight,
+                textureContext, sourceRect.left, sourceRect.top, sourceWidth, sourceHeight, blend);
+        }
+        else
+        {
+            StretchBlt(backBufferContext, drawX, drawY, drawWidth, drawHeight,
+                textureContext, sourceRect.left, sourceRect.top, sourceWidth, sourceHeight, SRCCOPY);
+        }
+    }
+
+    SelectObject(textureContext, oldTextureBitmap);
+    DeleteDC(textureContext);
+}
+
+void Renderer::DrawSprite(const Sprite& sprite, int x, int y, const RenderOptions& options)
+{
+    const Texture* texture = sprite.GetTexture();
+    if (!texture)
+    {
+        return;
+    }
+
+    DrawTexture(*texture, x, y, sprite.GetSourceRect(), sprite.UsesTransparentColor(), sprite.GetTransparentColor(), options);
+}
+
+void Renderer::DrawCenteredText(const std::wstring& text, int y, int height, int fontSize, COLORREF color, const wchar_t* fontFamily, int fontWeight)
+{
+    HFONT font = CreateRenderFont(fontSize, fontWeight, fontFamily);
     HGDIOBJ oldFont = SelectObject(backBufferContext, font);
 
     RECT textRect{ clientRect.left, y, clientRect.right, y + height };
@@ -33,10 +184,9 @@ void Renderer::DrawCenteredText(const std::wstring& text, int y, int height, int
     DeleteObject(font);
 }
 
-void Renderer::DrawTextLine(const std::wstring& text, int x, int y, int fontSize, COLORREF color)
+void Renderer::DrawTextLine(const std::wstring& text, int x, int y, int fontSize, COLORREF color, const wchar_t* fontFamily, int fontWeight)
 {
-    HFONT font = CreateFontW(fontSize, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET,
-        OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Consolas");
+    HFONT font = CreateRenderFont(fontSize, fontWeight, fontFamily);
     HGDIOBJ oldFont = SelectObject(backBufferContext, font);
 
     SetBkMode(backBufferContext, TRANSPARENT);

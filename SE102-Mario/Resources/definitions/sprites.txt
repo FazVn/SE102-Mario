@@ -1,1 +1,13 @@
-# sprite definitions placeholder
+# Format:
+# sprite_id texture_id left top width height transparent
+#
+# transparent:
+#   none      Draw opaque.
+#   auto      Use the pixel at left/top as the color key.
+#   R,G,B     Use an explicit color key, for example 0,80,80.
+#   0xRRGGBB  Use an explicit hex color key.
+background.sky backgrounds 4 19 257 222 none
+background.mountain backgrounds 638 112 258 132 auto
+scenery.cloud backgrounds 49 389 256 112 auto
+tile.question items_blocks 0 83 16 16 none
+mario.small.stand mario 3 35 16 16 auto

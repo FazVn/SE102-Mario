@@ -94,6 +94,18 @@
     <ClCompile Include="Core\Animation.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="Core\AssetPaths.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\TextureManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\SpriteManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\FontManager.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
     <ClCompile Include="Scenes\WinScene.cpp">
       <Filter>Scenes</Filter>
     </ClCompile>
@@ -199,6 +211,18 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Core\Animation.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\AssetPaths.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\TextureManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\SpriteManager.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\FontManager.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\WinScene.h">

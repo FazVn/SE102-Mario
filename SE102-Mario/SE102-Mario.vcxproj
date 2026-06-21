@@ -152,6 +152,10 @@
     <ClCompile Include="Core\Texture.cpp" />
     <ClCompile Include="Core\Sprite.cpp" />
     <ClCompile Include="Core\Animation.cpp" />
+    <ClCompile Include="Core\AssetPaths.cpp" />
+    <ClCompile Include="Core\TextureManager.cpp" />
+    <ClCompile Include="Core\SpriteManager.cpp" />
+    <ClCompile Include="Core\FontManager.cpp" />
     <ClCompile Include="Scenes\WinScene.cpp" />
     <ClCompile Include="World\LevelLoader.cpp" />
     <ClCompile Include="World\TileMap.cpp" />
@@ -189,6 +193,10 @@
     <ClInclude Include="Core\Texture.h" />
     <ClInclude Include="Core\Sprite.h" />
     <ClInclude Include="Core\Animation.h" />
+    <ClInclude Include="Core\AssetPaths.h" />
+    <ClInclude Include="Core\TextureManager.h" />
+    <ClInclude Include="Core\SpriteManager.h" />
+    <ClInclude Include="Core\FontManager.h" />
     <ClInclude Include="Scenes\WinScene.h" />
     <ClInclude Include="World\LevelLoader.h" />
     <ClInclude Include="World\TileMap.h" />
