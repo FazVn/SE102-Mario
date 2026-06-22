@@ -10,7 +10,6 @@
 
 void PlayScene::Load()
 {
-    elapsedTime = 0.0f;
     assetsLoaded = textureManager.LoadFromDefinitionFile(L"definitions/textures.txt");
     assetsLoaded = spriteManager.LoadFromDefinitionFile(L"definitions/sprites.txt", textureManager) && assetsLoaded;
 
@@ -23,13 +22,14 @@ void PlayScene::Load()
         }
     }
 
-    marioIdleAnimation.Clear();
-    marioIdleAnimation.AddFrame(spriteManager.Get("mario.small.stand"), 0.25f);
+    mario.SetPosition(100.0f, 300.0f);
+    mario.SetRenderSize(Mario::DefaultRenderWidth, Mario::DefaultRenderHeight);
+    mario.SetSprite(spriteManager.Get("mario.small.stand"));
 }
 
 void PlayScene::Unload()
 {
-    marioIdleAnimation.Clear();
+    mario.SetSprite(nullptr);
     spriteManager.Clear();
     textureManager.Clear();
     fontManager.Clear();
@@ -37,8 +37,7 @@ void PlayScene::Unload()
 
 void PlayScene::Update(SceneManager& sceneManager, const Input& input, float deltaTime)
 {
-    elapsedTime += deltaTime;
-    marioIdleAnimation.Update(deltaTime);
+    (void)deltaTime;
 
     if (input.WasKeyPressed('G'))
     {
@@ -85,17 +84,12 @@ void PlayScene::Render(Renderer& renderer, HWND windowHandle)
         }
     }
 
-    if (const Sprite* mario = marioIdleAnimation.GetCurrentSprite())
-    {
-        RenderOptions marioOptions;
-        marioOptions.scale = 3.0f;
-        renderer.DrawSprite(*mario, 160, 368, marioOptions);
-    }
+    mario.Render(renderer);
 
-    renderer.DrawCenteredText(L"MARIO ASSET TEST", 26, 40, 28, RGB(255, 255, 255), marioFontFamily.c_str(), FW_NORMAL);
-    renderer.DrawTextLine(assetsLoaded ? L"PNG sprites + TTF font loaded" : L"Some assets failed to load", 36, 74, 18,
+    renderer.DrawCenteredText(L"Sprite render test", 26, 40, 28, RGB(255, 255, 255), marioFontFamily.c_str(), FW_NORMAL);
+    renderer.DrawTextLine(assetsLoaded ? L"Mario should appear at (100, 300)" : L"Some assets failed to load", 36, 74, 18,
         assetsLoaded ? RGB(30, 55, 60) : RGB(160, 20, 20), marioFontFamily.c_str(), FW_NORMAL);
-    renderer.DrawTextLine(L"Wide text path ready: Xin chao Mario!", 36, 104, 18, RGB(30, 55, 60));
+    renderer.DrawTextLine(L"Frame: mario.small.stand source (3, 35) to (19, 51)", 36, 104, 18, RGB(30, 55, 60));
     renderer.DrawTextLine(L"Press G for GameOver, R to reset, Esc to quit.", 36, 136, 18, RGB(30, 55, 60));
 
     renderer.End();

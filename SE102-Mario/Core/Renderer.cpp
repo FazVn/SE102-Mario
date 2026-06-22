@@ -24,6 +24,11 @@ namespace
         FillRect(targetContext, &rect, brush);
         DeleteObject(brush);
     }
+
+    RECT MakeSourceRect(int xLeft, int yTop, int xRight, int yDown)
+    {
+        return RECT{ xLeft, yTop, xRight, yDown };
+    }
 }
 
 void Renderer::Begin(HWND hwnd, COLORREF clearColor)
@@ -49,7 +54,29 @@ void Renderer::DrawTexture(const Texture& texture, int x, int y, const RECT& sou
     DrawTexture(texture, x, y, sourceRect, false, RGB(255, 0, 255), options);
 }
 
+void Renderer::DrawTexture(const Texture& texture, int x, int y, int destinationWidth, int destinationHeight, const RECT& sourceRect, const RenderOptions& options)
+{
+    DrawTexture(texture, x, y, destinationWidth, destinationHeight, sourceRect, false, RGB(255, 0, 255), options);
+}
+
 void Renderer::DrawTexture(const Texture& texture, int x, int y, const RECT& sourceRect, bool useTransparentColor, COLORREF transparentColor, const RenderOptions& options)
+{
+    const int sourceWidth = sourceRect.right - sourceRect.left;
+    const int sourceHeight = sourceRect.bottom - sourceRect.top;
+    if (sourceWidth <= 0 || sourceHeight <= 0)
+    {
+        return;
+    }
+
+    const float scale = options.scale <= 0.0f ? 1.0f : options.scale;
+    const int scaledWidthCandidate = static_cast<int>(std::lround(sourceWidth * scale));
+    const int scaledHeightCandidate = static_cast<int>(std::lround(sourceHeight * scale));
+    const int scaledWidth = scaledWidthCandidate > 1 ? scaledWidthCandidate : 1;
+    const int scaledHeight = scaledHeightCandidate > 1 ? scaledHeightCandidate : 1;
+    DrawTexture(texture, x, y, scaledWidth, scaledHeight, sourceRect, useTransparentColor, transparentColor, options);
+}
+
+void Renderer::DrawTexture(const Texture& texture, int x, int y, int destinationWidth, int destinationHeight, const RECT& sourceRect, bool useTransparentColor, COLORREF transparentColor, const RenderOptions& options)
 {
     if (!backBufferContext || !texture.GetHandle())
     {
@@ -63,11 +90,10 @@ void Renderer::DrawTexture(const Texture& texture, int x, int y, const RECT& sou
         return;
     }
 
-    const float scale = options.scale <= 0.0f ? 1.0f : options.scale;
-    const int scaledWidth = static_cast<int>(std::lround(sourceWidth * scale));
-    const int scaledHeight = static_cast<int>(std::lround(sourceHeight * scale));
-    const int destinationWidth = scaledWidth > 1 ? scaledWidth : 1;
-    const int destinationHeight = scaledHeight > 1 ? scaledHeight : 1;
+    if (destinationWidth <= 0 || destinationHeight <= 0)
+    {
+        return;
+    }
 
     HDC textureContext = CreateCompatibleDC(backBufferContext);
     HGDIOBJ oldTextureBitmap = SelectObject(textureContext, texture.GetHandle());
@@ -159,6 +185,16 @@ void Renderer::DrawTexture(const Texture& texture, int x, int y, const RECT& sou
     DeleteDC(textureContext);
 }
 
+void Renderer::DrawSprite(const Texture& texture, int x, int y, int xLeft, int yTop, int xRight, int yDown, const RenderOptions& options)
+{
+    DrawTexture(texture, x, y, MakeSourceRect(xLeft, yTop, xRight, yDown), options);
+}
+
+void Renderer::DrawSprite(const Texture& texture, int x, int y, int destinationWidth, int destinationHeight, int xLeft, int yTop, int xRight, int yDown, const RenderOptions& options)
+{
+    DrawTexture(texture, x, y, destinationWidth, destinationHeight, MakeSourceRect(xLeft, yTop, xRight, yDown), options);
+}
+
 void Renderer::DrawSprite(const Sprite& sprite, int x, int y, const RenderOptions& options)
 {
     const Texture* texture = sprite.GetTexture();
@@ -168,6 +204,17 @@ void Renderer::DrawSprite(const Sprite& sprite, int x, int y, const RenderOption
     }
 
     DrawTexture(*texture, x, y, sprite.GetSourceRect(), sprite.UsesTransparentColor(), sprite.GetTransparentColor(), options);
+}
+
+void Renderer::DrawSprite(const Sprite& sprite, int x, int y, int destinationWidth, int destinationHeight, const RenderOptions& options)
+{
+    const Texture* texture = sprite.GetTexture();
+    if (!texture)
+    {
+        return;
+    }
+
+    DrawTexture(*texture, x, y, destinationWidth, destinationHeight, sprite.GetSourceRect(), sprite.UsesTransparentColor(), sprite.GetTransparentColor(), options);
 }
 
 void Renderer::DrawCenteredText(const std::wstring& text, int y, int height, int fontSize, COLORREF color, const wchar_t* fontFamily, int fontWeight)

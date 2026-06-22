@@ -90,6 +90,17 @@ bool SpriteManager::Add(const std::string& id, const Sprite& sprite)
     return true;
 }
 
+bool SpriteManager::Add(const std::string& id, const Texture* texture, int xLeft, int yTop, int xRight, int yDown, bool useTransparentColor, COLORREF transparentColor)
+{
+    if (!texture || xRight <= xLeft || yDown <= yTop)
+    {
+        return false;
+    }
+
+    RECT sourceRect{ xLeft, yTop, xRight, yDown };
+    return Add(id, Sprite(id, texture, sourceRect, useTransparentColor, transparentColor));
+}
+
 bool SpriteManager::LoadFromDefinitionFile(const std::wstring& resourceDefinitionPath, const TextureManager& textureManager)
 {
     const std::wstring resolvedPath = AssetPaths::ResolveResourcePath(resourceDefinitionPath);
@@ -107,13 +118,13 @@ bool SpriteManager::LoadFromDefinitionFile(const std::wstring& resourceDefinitio
 
         std::string id;
         std::string textureId;
-        int left = 0;
-        int top = 0;
-        int width = 0;
-        int height = 0;
+        int xLeft = 0;
+        int yTop = 0;
+        int xRight = 0;
+        int yDown = 0;
         std::string transparentToken = "auto";
 
-        if (!(parser >> id >> textureId >> left >> top >> width >> height))
+        if (!(parser >> id >> textureId >> xLeft >> yTop >> xRight >> yDown))
         {
             continue;
         }
@@ -121,13 +132,13 @@ bool SpriteManager::LoadFromDefinitionFile(const std::wstring& resourceDefinitio
         parser >> transparentToken;
 
         const Texture* texture = textureManager.Get(textureId);
-        if (!texture || width <= 0 || height <= 0)
+        if (!texture || xRight <= xLeft || yDown <= yTop)
         {
             allLoaded = false;
             continue;
         }
 
-        RECT sourceRect{ left, top, left + width, top + height };
+        RECT sourceRect{ xLeft, yTop, xRight, yDown };
         bool useTransparentColor = true;
         COLORREF transparentColor = RGB(255, 0, 255);
         if (!ResolveTransparentColor(transparentToken, *texture, sourceRect, useTransparentColor, transparentColor))
@@ -136,7 +147,7 @@ bool SpriteManager::LoadFromDefinitionFile(const std::wstring& resourceDefinitio
             continue;
         }
 
-        Add(id, Sprite(id, texture, sourceRect, useTransparentColor, transparentColor));
+        Add(id, texture, xLeft, yTop, xRight, yDown, useTransparentColor, transparentColor);
     }
 
     return allLoaded;

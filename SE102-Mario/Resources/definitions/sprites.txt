@@ -1,13 +1,16 @@
 # Format:
-# sprite_id texture_id left top width height transparent
+# sprite_id texture_id xLeft yTop xRight yDown transparent
+#
+# Source width  = xRight - xLeft
+# Source height = yDown - yTop
 #
 # transparent:
 #   none      Draw opaque.
-#   auto      Use the pixel at left/top as the color key.
+#   auto      Use the pixel at xLeft/yTop as the color key.
 #   R,G,B     Use an explicit color key, for example 0,80,80.
 #   0xRRGGBB  Use an explicit hex color key.
-background.sky backgrounds 4 19 257 222 none
-background.mountain backgrounds 638 112 258 132 auto
-scenery.cloud backgrounds 49 389 256 112 auto
-tile.question items_blocks 0 83 16 16 none
-mario.small.stand mario 3 35 16 16 auto
+background.sky backgrounds 4 19 261 241 none
+background.mountain backgrounds 638 112 896 244 auto
+scenery.cloud backgrounds 49 389 305 501 auto
+tile.question items_blocks 0 83 16 99 none
+mario.small.stand mario 3 35 23 66 auto
