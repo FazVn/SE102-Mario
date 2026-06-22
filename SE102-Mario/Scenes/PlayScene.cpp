@@ -13,7 +13,7 @@ void PlayScene::Load()
     assetsLoaded = textureManager.LoadFromDefinitionFile(L"definitions/textures.txt");
     assetsLoaded = spriteManager.LoadFromDefinitionFile(L"definitions/sprites.txt", textureManager) && assetsLoaded;
 
-    if (fontManager.Load("mario", L"fonts/SuperMario256.ttf", L"Super Mario 256"))
+    if (fontManager.Load("mario", L"fonts/SS-Mario-Regular.otf", L"SS-Mario-Regular"))
     {
         const std::wstring* loadedFamily = fontManager.GetFamily("mario");
         if (loadedFamily)
@@ -89,7 +89,7 @@ void PlayScene::Render(Renderer& renderer, HWND windowHandle)
     renderer.DrawCenteredText(L"Sprite render test", 26, 40, 28, RGB(255, 255, 255), marioFontFamily.c_str(), FW_NORMAL);
     renderer.DrawTextLine(assetsLoaded ? L"Mario should appear at (100, 300)" : L"Some assets failed to load", 36, 74, 18,
         assetsLoaded ? RGB(30, 55, 60) : RGB(160, 20, 20), marioFontFamily.c_str(), FW_NORMAL);
-    renderer.DrawTextLine(L"Frame: mario.small.stand source (3, 35) to (19, 51)", 36, 104, 18, RGB(30, 55, 60));
+    renderer.DrawTextLine(L"Frame: mario.small.stand source (3, 35) to (23, 66)", 36, 104, 18, RGB(30, 55, 60));
     renderer.DrawTextLine(L"Press G for GameOver, R to reset, Esc to quit.", 36, 136, 18, RGB(30, 55, 60));
 
     renderer.End();
