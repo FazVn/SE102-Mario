@@ -13,7 +13,7 @@ void PlayScene::Load()
     assetsLoaded = textureManager.LoadFromDefinitionFile(L"definitions/textures.txt");
     assetsLoaded = spriteManager.LoadFromDefinitionFile(L"definitions/sprites.txt", textureManager) && assetsLoaded;
 
-    if (fontManager.Load("mario", L"fonts/SS-Mario-Regular.otf", L"SS-Mario-Regular"))
+    if (fontManager.Load("mario", L"fonts/SS-Mario-Regular.otf", L"SS Mario"))
     {
         const std::wstring* loadedFamily = fontManager.GetFamily("mario");
         if (loadedFamily)
