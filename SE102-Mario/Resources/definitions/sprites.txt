@@ -9,15 +9,31 @@
 #   auto      Use the pixel at xLeft/yTop as the color key.
 #   R,G,B     Use an explicit color key, for example 0,80,80.
 #   0xRRGGBB  Use an explicit hex color key.
+#	 background
 background.sky backgrounds 4 19 261 241 none
 background.mountain backgrounds 638 112 896 244 auto
+#	 clouds (fullcloud is the whole cloud cycle)
 scenery.cloud backgrounds 45 379 320 519 auto
-scenery.cloud2 clouds 540 40 775 256 auto
+scenery.fullcloud clouds 18 18 3089 256 auto
+#	 small mario
 mario.small.stand mario 3 35 22 65 auto
+mario.small.walk1 mario 3 77 22 107 auto
+mario.small.walk2 mario 24 77 43 107 auto
+mario.small.walk3 mario 45 77 64 107 auto
+mario.small.jump mario  47 35 66 65 auto
+mario.small.die mario 91 35 110 65 auto
+#	 super mario
 mario.super.stand mario 383 35 402 65 auto
+mario.super.walk1 mario 383 77 402 107 auto
+mario.super.walk2 mario 404 77 423 107 auto
+mario.super.walk3 mario 425 77 444 107 auto
+mario.super.jump mario 476 35 495 65 auto
+mario.super.crouch mario 427 35 446 65 auto
+#	 blocks
 block.gold.tanborder.brick items_blocks 36 113 52 129 none
 block.gold.blackborder.brick items_blocks 19 113 35 129 none
 block.brightyellow.question items_blocks 36 96 52 112 none
 block.dirt items_blocks 113 18 129 34 none
 block.gold.question items_blocks 2 96 18 112 none
-coin.gold items_blocks 92 38 101 52 none
+#	 items
+coin.gold items_blocks 92 38 101 52 auto

@@ -20,19 +20,21 @@ namespace
         return meters * Mario::MeterToPixel;
     }
 
-    float MoveTowardZero(float value, float maxDelta)
+    float MoveTowards(float current, float target, float maxDelta)
     {
-        if (value > maxDelta)
+        if (current < target)
         {
-            return value - maxDelta;
+            const float next = current + maxDelta;
+            return next > target ? target : next;
         }
 
-        if (value < -maxDelta)
+        if (current > target)
         {
-            return value + maxDelta;
+            const float next = current - maxDelta;
+            return next < target ? target : next;
         }
 
-        return 0.0f;
+        return target;
     }
 
     float CalculateJumpVelocity(float marioHeightMeters)
@@ -97,19 +99,40 @@ void Mario::Update(const Input& input, float deltaTime)
 
     const bool moveLeft = input.IsKeyDown(VK_LEFT) || input.IsKeyDown('A');
     const bool moveRight = input.IsKeyDown(VK_RIGHT) || input.IsKeyDown('D');
-    const int horizontalDirection = (moveRight ? 1 : 0) - (moveLeft ? 1 : 0);
+    float inputDirection = 0.0f;
 
-    if (horizontalDirection != 0)
+    if (moveLeft)
     {
-        velocityMetersX += horizontalDirection * RunAcceleration * deltaTime;
-        facingDirection = horizontalDirection < 0 ? FacingDirection::Left : FacingDirection::Right;
+        inputDirection -= 1.0f;
+    }
+
+    if (moveRight)
+    {
+        inputDirection += 1.0f;
+    }
+
+    if (inputDirection == 0.0f)
+    {
+        velocityMetersX = MoveTowards(velocityMetersX, 0.0f, RunDeceleration * deltaTime);
     }
     else
     {
-        velocityMetersX = MoveTowardZero(velocityMetersX, RunDeceleration * deltaTime);
-    }
+        facingDirection = inputDirection < 0.0f ? FacingDirection::Left : FacingDirection::Right;
 
-    velocityMetersX = std::clamp(velocityMetersX, -MaxRunSpeed, MaxRunSpeed);
+        const bool braking = (velocityMetersX > 0.0f && inputDirection < 0.0f) ||
+            (velocityMetersX < 0.0f && inputDirection > 0.0f);
+
+        if (braking)
+        {
+            const float activeDeceleration = RunDeceleration + RunAcceleration;
+            velocityMetersX = MoveTowards(velocityMetersX, 0.0f, activeDeceleration * deltaTime);
+        }
+        else
+        {
+            velocityMetersX += inputDirection * RunAcceleration * deltaTime;
+            velocityMetersX = std::clamp(velocityMetersX, -MaxRunSpeed, MaxRunSpeed);
+        }
+    }
 
     if (input.WasKeyPressed(VK_SPACE) && onGround)
     {
