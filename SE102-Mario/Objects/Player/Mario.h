@@ -9,8 +9,8 @@ class Mario : public GameObject
 public:
     static constexpr int SmallStandXLeft = 3;
     static constexpr int SmallStandYTop = 35;
-    static constexpr int SmallStandXRight = 23;
-    static constexpr int SmallStandYDown = 66;
+    static constexpr int SmallStandXRight = 22;
+    static constexpr int SmallStandYDown = 65;
     static constexpr int DefaultRenderWidth = 48;
     static constexpr int DefaultRenderHeight = 48;
 
