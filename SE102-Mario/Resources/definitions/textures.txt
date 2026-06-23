@@ -1,5 +1,6 @@
 # Format: texture_id resource_relative_path
 # Paths are resolved under Resources/ from the project folder, solution root, or build output.
 backgrounds textures/backgrounds.png
+clouds textures/clouds.png
 mario textures/mario-3.png
 items_blocks textures/items-blocks.png

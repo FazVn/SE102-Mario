@@ -11,12 +11,13 @@
 #   0xRRGGBB  Use an explicit hex color key.
 background.sky backgrounds 4 19 261 241 none
 background.mountain backgrounds 638 112 896 244 auto
-scenery.cloud backgrounds 49 389 305 501 auto
-tile.question items_blocks 0 83 16 99 none
+scenery.cloud backgrounds 45 379 320 519 auto
+scenery.cloud2 clouds 540 40 775 256 auto
 mario.small.stand mario 3 35 22 65 auto
 mario.super.stand mario 383 35 402 65 auto
 block.gold.tanborder.brick items_blocks 36 113 52 129 none
 block.gold.blackborder.brick items_blocks 19 113 35 129 none
 block.brightyellow.question items_blocks 36 96 52 112 none
+block.dirt items_blocks 113 18 129 34 none
 block.gold.question items_blocks 2 96 18 112 none
 coin.gold items_blocks 92 38 101 52 none

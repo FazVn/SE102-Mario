@@ -1,12 +1,20 @@
 #include "PlayScene.h"
 
+#include "../Core/GameConfig.h"
 #include "../Core/Input.h"
-#include "../Core/RenderOptions.h"
 #include "../Core/Renderer.h"
 #include "../Core/Sprite.h"
 #include "SceneManager.h"
 
 #include <string>
+
+namespace
+{
+    constexpr int BrickTileSize = 32;
+    constexpr float GroundHeight = 64.0f;
+    constexpr float RaisedPlatformHeight = 32.0f;
+    constexpr float MaxPhysicsDeltaTime = 0.05f;
+}
 
 void PlayScene::Load()
 {
@@ -22,14 +30,14 @@ void PlayScene::Load()
         }
     }
 
-    mario.SetPosition(100.0f, 100.0f);
-    mario.SetRenderSize(57, 90);
-    mario.SetSprite(spriteManager.Get("mario.super.stand"));
+    BuildTestLevel();
 }
 
 void PlayScene::Unload()
 {
     mario.SetSprite(nullptr);
+    platforms.clear();
+    solidBounds.clear();
     spriteManager.Clear();
     textureManager.Clear();
     fontManager.Clear();
@@ -37,8 +45,6 @@ void PlayScene::Unload()
 
 void PlayScene::Update(SceneManager& sceneManager, const Input& input, float deltaTime)
 {
-    (void)deltaTime;
-
     if (input.WasKeyPressed('G'))
     {
         sceneManager.RequestChange(SceneId::GameOver);
@@ -49,53 +55,61 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
         sceneManager.RequestChange(SceneId::Play);
     }
 
+    const float physicsDeltaTime = deltaTime > MaxPhysicsDeltaTime ? MaxPhysicsDeltaTime : deltaTime;
+    mario.Update(input, physicsDeltaTime);
+    mario.ResolveVerticalCollision(solidBounds);
 }
 
 void PlayScene::Render(Renderer& renderer, HWND windowHandle)
 {
     renderer.Begin(windowHandle, RGB(92, 148, 252));
 
-    if (const Sprite* sky = spriteManager.Get("background.sky"))
-    {
-        RenderOptions skyOptions;
-        skyOptions.scale = 3.12f;
-        renderer.DrawSprite(*sky, 0, 0, skyOptions);
-    }
-
-    if (const Sprite* mountain = spriteManager.Get("background.mountain"))
-    {
-        RenderOptions mountainOptions;
-        mountainOptions.scale = 1.45f;
-        renderer.DrawSprite(*mountain, 390, 175, mountainOptions);
-    }
-
     if (const Sprite* cloud = spriteManager.Get("scenery.cloud"))
     {
-        renderer.DrawSprite(*cloud, 70, 96);
+        renderer.DrawSprite(*cloud, 68, 70, 120, 61);
+        renderer.DrawSprite(*cloud, 560, 86, 96, 49);
     }
 
-    if (const Sprite* tile = spriteManager.Get("tile.question"))
+    for (Platform& platform : platforms)
     {
-        RenderOptions tileOptions;
-        tileOptions.scale = 2.0f;
-        for (int x = 0; x < 800; x += 32)
-        {
-            renderer.DrawSprite(*tile, x, 416, tileOptions);
-        }
+        platform.Render(renderer);
     }
 
     mario.Render(renderer);
 
-    if (const Sprite* brick = spriteManager.Get("block.gold.blackborder.brick"))
+    renderer.End();
+}
+
+void PlayScene::BuildTestLevel()
+{
+    platforms.clear();
+    solidBounds.clear();
+
+    const Sprite* brickSprite = spriteManager.Get("block.gold.blackborder.brick");
+    const float groundTop = static_cast<float>(GameConfig::WindowHeight) - GroundHeight;
+
+    platforms.emplace_back(0.0f, groundTop, static_cast<float>(GameConfig::WindowWidth), GroundHeight,
+        brickSprite, BrickTileSize, BrickTileSize);
+    platforms.emplace_back(320.0f, groundTop - RaisedPlatformHeight, 160.0f, RaisedPlatformHeight,
+        brickSprite, BrickTileSize, BrickTileSize);
+
+    for (const Platform& platform : platforms)
     {
-        renderer.DrawSprite(*brick, 200, 100, 48, 48);
+        solidBounds.push_back(platform.GetBoundingBox());
     }
 
-    renderer.DrawCenteredText(L"Sprite render test", 26, 40, 28, RGB(255, 255, 255), marioFontFamily.c_str(), FW_NORMAL);
-    renderer.DrawTextLine(assetsLoaded ? L"mario.super.stand at (100, 100)" : L"Some assets failed to load", 36, 300, 18,
-        assetsLoaded ? RGB(30, 55, 60) : RGB(160, 20, 20), marioFontFamily.c_str(), FW_NORMAL);
-    renderer.DrawTextLine(L"block.gold.blackborder.brick at (200, 100)", 36, 330, 18, RGB(30, 55, 60));
-    renderer.DrawTextLine(L"Press G for GameOver, R to reset, Esc to quit.", 36, 360, 18, RGB(30, 55, 60));
+    const Sprite* marioSprite = spriteManager.Get("mario.super.stand");
+    mario.SetSprite(marioSprite);
 
-    renderer.End();
+    if (marioSprite)
+    {
+        mario.SetRenderSize(marioSprite->GetWidth(), marioSprite->GetHeight());
+    }
+    else
+    {
+        mario.SetRenderSize(Mario::DefaultRenderWidth, Mario::DefaultRenderHeight);
+    }
+
+    mario.SetPosition(96.0f, groundTop - mario.GetHeight());
+    mario.SetOnGround(true);
 }
