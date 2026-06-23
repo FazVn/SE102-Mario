@@ -47,6 +47,9 @@
     <Filter Include="Tests">
       <UniqueIdentifier>{85AD1AFF-CB73-442E-BB12-0C8A99C4F255}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources\fonts">
+      <UniqueIdentifier>{c6974d2e-9216-4412-82b4-24735dedaec8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -302,5 +305,13 @@
     <None Include="Tests\known_bugs.md">
       <Filter>Tests</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Resources\fonts\SS-Mario-Regular.otf">
+      <Filter>Resources\fonts</Filter>
+    </Font>
+    <Font Include="Resources\fonts\SuperMario256.ttf">
+      <Filter>Resources\fonts</Filter>
+    </Font>
   </ItemGroup>
 </Project>
