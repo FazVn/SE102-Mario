@@ -217,7 +217,6 @@
   </ItemGroup>
   <ItemGroup>
     <Font Include="Resources\fonts\SS-Mario-Regular.otf" />
-    <Font Include="Resources\fonts\SuperMario256.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
