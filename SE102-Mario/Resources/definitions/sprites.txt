@@ -16,19 +16,28 @@ background.mountain backgrounds 638 112 896 244 auto
 scenery.cloud backgrounds 45 379 320 519 auto
 scenery.fullcloud clouds 18 18 3089 256 auto
 #	 small mario
-mario.small.stand mario 3 35 22 65 auto
-mario.small.walk1 mario 3 77 22 107 auto
-mario.small.walk2 mario 24 77 43 107 auto
-mario.small.walk3 mario 45 77 64 107 auto
-mario.small.jump mario  47 35 66 65 auto
+mario.small.stand mario 3 35 22 65 auto # standing (right facing)
+mario.small.walk1 mario 3 77 22 107 auto # starting to walk (right facing)
+mario.small.walk2 mario 24 77 43 107 auto # walking in slow speed (right facing)
+mario.small.walk3 mario 45 77 64 107 auto # walking in fast speed (right facing)
+mario.small.jump mario  47 35 66 65 auto # jumping (right facing)
 mario.small.die mario 91 35 110 65 auto
 #	 super mario
-mario.super.stand mario 383 35 402 65 auto
-mario.super.walk1 mario 383 77 402 107 auto
-mario.super.walk2 mario 404 77 423 107 auto
-mario.super.walk3 mario 425 77 444 107 auto
-mario.super.jump mario 476 35 495 65 auto
+mario.super.stand mario 383 35 402 65 auto # standing (right facing)
+mario.super.walk1 mario 383 77 402 107 auto # starting to walk (right facing)
+mario.super.walk2 mario 404 77 423 107 auto # walking in slow speed (right facing)
+mario.super.walk3 mario 425 77 444 107 auto # walking in fast speed (right facing)
+mario.super.jump mario 476 35 495 65 auto # jumping (right facing)
 mario.super.crouch mario 427 35 446 65 auto
+#	 enemies
+##	 goomba
+enemy.goomba.walk1 enemies 1 45 16 60 auto # left facing
+enemy.goomba.walk2 enemies 18 45 33 60 auto # right facing
+enemy.goomba.squashed enemies 35 45 50 60 auto
+##	 koopa (walking animation: walk1 -> walk2 -> walk1 -> walk2 -> ....)
+enemy.koopa.walk1 enemies 52 37 67 60 auto # frame 1 of walking animation (right facing)
+enemy.koopa.walk2 enemies 69 37 84 60 auto # frame 2 of walking animation (right facing)
+enemy.koopa.shell enemies 120 45 135 60 auto # koopa shell
 #	 blocks
 ##	 brick blocks
 block.gold.tanborder.brick items_blocks 36 113 52 129 none
@@ -42,5 +51,20 @@ block.dirt dirt_block 0 0 1200 1200 none
 block.question.frame1 items_blocks 2 96 17 111 none
 block.question.frame2 items_blocks 19 96 34 111 none
 block.question.frame3 items_blocks 36 96 51 111 none
+#	 pipes
+pipe.green.top misc_8 174 34 206 49 auto
+pipe.green.body misc_8 176 51 204 66 auto
 #	 items
-coin.gold items_blocks 92 38 101 52 auto
+##	 coins (coin animation: frame1 -> frame2 -> frame3 -> frame2 -> frame1 -> frame2 -> frame3 -> ....))
+item.coin.frame1 items_blocks 70 38 79 51 auto
+item.coin.frame2 items_blocks 81 38 90 51 auto
+item.coin.frame3 items_blocks 92 38 101 51 auto
+##	 mushroom
+item.mushroom.red items_blocks 2 2 17 17 auto
+item.mushroom.green items_blocks 19 2 34 17 auto
+item.flower.yellow items_blocks 2 19 17 34 auto
+item.flower.green items_blocks 19 19 34 34 auto
+item.flower.red items_blocks 36 19 51 34 auto
+item.star.yellow items_blocks 2 36 17 51 auto
+item.star.green items_blocks 19 36 34 51 auto
+item.star.red items_blocks 36 36 51 51 auto
