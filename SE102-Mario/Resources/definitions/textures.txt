@@ -4,3 +4,4 @@ backgrounds textures/backgrounds.png
 clouds textures/clouds.png
 mario textures/mario-3.png
 items_blocks textures/items-blocks.png
+dirt_block textures/dirt-block.png

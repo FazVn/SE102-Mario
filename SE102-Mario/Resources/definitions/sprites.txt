@@ -30,10 +30,17 @@ mario.super.walk3 mario 425 77 444 107 auto
 mario.super.jump mario 476 35 495 65 auto
 mario.super.crouch mario 427 35 446 65 auto
 #	 blocks
+##	 brick blocks
 block.gold.tanborder.brick items_blocks 36 113 52 129 none
 block.gold.blackborder.brick items_blocks 19 113 35 129 none
 block.brightyellow.question items_blocks 36 96 52 112 none
-block.dirt items_blocks 113 18 129 34 none
-block.gold.question items_blocks 2 96 18 112 none
+##	 used block
+block.used items_blocks 113 18 129 34 none
+##	 dirt block
+block.dirt dirt_block 0 0 1200 1200 none
+##	 question blocks
+block.question.frame1 items_blocks 2 96 17 111 none
+block.question.frame2 items_blocks 19 96 34 111 none
+block.question.frame3 items_blocks 36 96 51 111 none
 #	 items
 coin.gold items_blocks 92 38 101 52 auto
