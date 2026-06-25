@@ -14,7 +14,7 @@ background.sky backgrounds 4 19 261 241 none
 background.mountain backgrounds 638 112 896 244 auto
 #	 clouds (fullcloud is the whole cloud cycle)
 scenery.cloud backgrounds 45 379 320 519 auto
-scenery.fullcloud clouds 18 18 3089 256 auto
+scenery.fullcloud clouds 18 18 3089 256 none
 #	 small mario
 mario.small.stand mario 3 35 22 65 auto # standing (right facing)
 mario.small.walk1 mario 3 77 22 107 auto # starting to walk (right facing)
