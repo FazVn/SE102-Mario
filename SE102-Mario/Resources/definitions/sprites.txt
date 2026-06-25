@@ -105,6 +105,10 @@ object.flag.frame2 misc_8 195 183 213 231 auto
 object.flag.frame3 misc_8 228 183 246 231 auto
 #	 castle
 object.castle.1 misc_8 410 4 567 179 auto
+#	 bursh
+object.brush.left misc_8 123 34 138 49 auto
+object.brush.right misc_8 140 34 155 49 auto
+object.brush.top misc_8 123 51 138 66 auto
 #	 items
 ##	 coins (coin animation: frame1 -> frame2 -> frame3 -> frame4 -> frame2 -> frame1 -> frame2 -> frame3 -> frame4 -> ....))
 item.coin.frame1 items_blocks 2 53 21 68 auto
