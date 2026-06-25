@@ -69,6 +69,7 @@ mario.fire.walk2 mario 812 77 831 107 auto # walk frame 1 (right facing)
 mario.fire.walk3 mario 833 77 852 107 auto # walk frame 2 (right facing)
 mario.fire.jump mario 884 35 903 65 auto # jumping (right facing)
 mario.fire.crouch mario 835 35 854 65 auto
+mario.fire.shoot mario 919 77 938 107 auto # shooting fireball (right facing)
 #	 enemies
 ##	 goomba
 enemy.goomba.walk1 enemies 1 45 16 60 auto # left facing
@@ -98,11 +99,18 @@ pipe.green.body misc_8 176 51 204 66 auto
 fireball.frame1 misc_8 519 181 532 196 auto
 fireball.frame2 misc_8 534 181 547 196 auto
 fireball.frame3 misc_8 549 181 562 196 auto
+#	 flag (animation: frame1 -> frame2 -> frame3 -> frame1 -> frame2 -> frame3 -> ....)
+object.flag.frame1 misc_8 162 183 180 231 auto
+object.flag.frame2 misc_8 195 183 213 231 auto
+object.flag.frame3 misc_8 228 183 246 231 auto
+#	 castle
+object.castle.1 misc_8 410 4 567 179 auto
 #	 items
-##	 coins (coin animation: frame1 -> frame2 -> frame3 -> frame2 -> frame1 -> frame2 -> frame3 -> ....))
-item.coin.frame1 items_blocks 70 38 79 51 auto
-item.coin.frame2 items_blocks 81 38 90 51 auto
-item.coin.frame3 items_blocks 92 38 101 51 auto
+##	 coins (coin animation: frame1 -> frame2 -> frame3 -> frame4 -> frame2 -> frame1 -> frame2 -> frame3 -> frame4 -> ....))
+item.coin.frame1 items_blocks 2 53 21 68 auto
+item.coin.frame2 items_blocks 23 53 42 68 auto
+item.coin.frame3 items_blocks 44 53 63 68 auto
+item.coin.frame4 items_blocks 65 53 84 68 auto
 ##	 mushrooms
 item.mushroom.red items_blocks 2 2 17 17 auto
 item.mushroom.green items_blocks 19 2 34 17 auto
