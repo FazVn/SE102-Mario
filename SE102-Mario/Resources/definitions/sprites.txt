@@ -22,13 +22,53 @@ mario.small.walk2 mario 24 77 43 107 auto # walking in slow speed (right facing)
 mario.small.walk3 mario 45 77 64 107 auto # walking in fast speed (right facing)
 mario.small.jump mario  47 35 66 65 auto # jumping (right facing)
 mario.small.die mario 91 35 110 65 auto
+#	 small -> super mario transition (right facing) (animation: frame1 -> frame2 -> frame3)
+mario.small_to_super.frame1 mario 175 136 194 166 auto
+mario.small_to_super.frame2 mario 196 136 215 166 auto
+mario.small_to_super.frame3 mario 217 136 236 166 auto
+#	 super -> small mario transition (right facing) (animation: frame1 -> frame2 -> frame3 -> frame4 -> frame5)
+mario.super_to_small.frame1 mario 613 131 632 161 auto
+mario.super_to_small.frame2 mario 634 131 653 161 auto
+mario.super_to_small.frame3 mario 655 131 674 161 auto
+mario.super_to_small.frame4 mario 676 131 695 161 auto
+mario.super_to_small.frame5 mario 697 131 716 161 auto
 #	 super mario
 mario.super.stand mario 383 35 402 65 auto # standing (right facing)
+##	 super mario walking animation: walk1 -> walk2 -> walk3 -> walk2 -> walk3 -> walk2 -> walk3 -> ....
 mario.super.walk1 mario 383 77 402 107 auto # starting to walk (right facing)
-mario.super.walk2 mario 404 77 423 107 auto # walking in slow speed (right facing)
-mario.super.walk3 mario 425 77 444 107 auto # walking in fast speed (right facing)
+mario.super.walk2 mario 404 77 423 107 auto # walk frame 1 (right facing)
+mario.super.walk3 mario 425 77 444 107 auto # walk frame 2 (right facing)
 mario.super.jump mario 476 35 495 65 auto # jumping (right facing)
 mario.super.crouch mario 427 35 446 65 auto
+#	 super -> fire mario transition (standing, right facing) (animation: frame1 -> frame2 -> frame3 -> frame4)
+mario.super_to_fire.stand.frame1 mario 790 213 809 243 auto
+mario.super_to_fire.stand.frame2 mario 811 213 830 243 auto
+mario.super_to_fire.stand.frame3 mario 832 213 851 243 auto
+mario.super_to_fire.stand.frame4 mario 853 213 872 243 auto
+#	 super -> fire mario transition (walk frame 1, right facing) (animation: frame1 -> frame2 -> frame3 -> frame4)
+mario.super_to_fire.walk1.frame1 mario 968 213 987 243 auto
+mario.super_to_fire.walk1.frame2 mario 989 213 1008 243 auto
+mario.super_to_fire.walk1.frame3 mario 1010 213 1029 243 auto
+mario.super_to_fire.walk1.frame4 mario 1031 213 1050 243 auto
+#	 super -> fire mario transition (walk frame 2, right facing) (animation: frame1 -> frame2 -> frame3 -> frame4)
+mario.super_to_fire.walk2.frame1 mario 1146 213 1165 243 auto
+mario.super_to_fire.walk2.frame2 mario 1167 213 1186 243 auto
+mario.super_to_fire.walk2.frame3 mario 1188 213 1207 243 auto
+mario.super_to_fire.walk2.frame4 mario 1209 213 1228 243 auto
+#	 fire -> mini mario transition (right facing) (animation: frame1 -> frame2 -> frame3 -> frame4 -> frame5)
+mario.fire_to_mini.frame1 mario 968 140 987 170 auto
+mario.fire_to_mini.frame2 mario 989 140 1008 170 auto
+mario.fire_to_mini.frame3 mario 1010 140 1029 170 auto
+mario.fire_to_mini.frame4 mario 1031 140 1050 170 auto
+mario.fire_to_mini.frame5 mario 1052 140 1071 170 auto
+#	 fire mario
+mario.fire.stand mario 791 35 810 65 auto # standing (right facing)
+##	 fire mario walking animation: walk1 -> walk2 -> walk3 -> walk2 -> walk3 -> walk2 -> walk3 -> ....
+mario.fire.walk1 mario 791 77 810 107 auto # starting to walk (right facing)
+mario.fire.walk2 mario 812 77 831 107 auto # walk frame 1 (right facing)
+mario.fire.walk3 mario 833 77 852 107 auto # walk frame 2 (right facing)
+mario.fire.jump mario 884 35 903 65 auto # jumping (right facing)
+mario.fire.crouch mario 835 35 854 65 auto
 #	 enemies
 ##	 goomba
 enemy.goomba.walk1 enemies 1 45 16 60 auto # left facing
@@ -54,17 +94,23 @@ block.question.frame3 items_blocks 36 96 51 111 none
 #	 pipes
 pipe.green.top misc_8 174 34 206 49 auto
 pipe.green.body misc_8 176 51 204 66 auto
+#	 fireballs (direction in the sprite file: up)
+fireball.frame1 misc_8 519 181 532 196 auto
+fireball.frame2 misc_8 534 181 547 196 auto
+fireball.frame3 misc_8 549 181 562 196 auto
 #	 items
 ##	 coins (coin animation: frame1 -> frame2 -> frame3 -> frame2 -> frame1 -> frame2 -> frame3 -> ....))
 item.coin.frame1 items_blocks 70 38 79 51 auto
 item.coin.frame2 items_blocks 81 38 90 51 auto
 item.coin.frame3 items_blocks 92 38 101 51 auto
-##	 mushroom
+##	 mushrooms
 item.mushroom.red items_blocks 2 2 17 17 auto
 item.mushroom.green items_blocks 19 2 34 17 auto
+##	 flowers
 item.flower.yellow items_blocks 2 19 17 34 auto
 item.flower.green items_blocks 19 19 34 34 auto
 item.flower.red items_blocks 36 19 51 34 auto
+##	 stars
 item.star.yellow items_blocks 2 36 17 51 auto
 item.star.green items_blocks 19 36 34 51 auto
 item.star.red items_blocks 36 36 51 51 auto
