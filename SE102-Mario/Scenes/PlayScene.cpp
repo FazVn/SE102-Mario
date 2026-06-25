@@ -10,7 +10,7 @@
 
 namespace
 {
-    constexpr int BrickTileSize = 32;
+    constexpr int GroundTileSize = 32;
     constexpr float GroundHeight = 64.0f;
     constexpr float RaisedPlatformHeight = 32.0f;
     constexpr float MaxPhysicsDeltaTime = 0.05f;
@@ -57,7 +57,7 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
 
     const float physicsDeltaTime = deltaTime > MaxPhysicsDeltaTime ? MaxPhysicsDeltaTime : deltaTime;
     mario.Update(input, physicsDeltaTime);
-    mario.ResolveVerticalCollision(solidBounds);
+    mario.ResolveSolidCollisions(solidBounds);
 }
 
 void PlayScene::Render(Renderer& renderer, HWND windowHandle)
@@ -85,13 +85,13 @@ void PlayScene::BuildTestLevel()
     platforms.clear();
     solidBounds.clear();
 
-    const Sprite* brickSprite = spriteManager.Get("block.gold.blackborder.brick");
+    const Sprite* groundSprite = spriteManager.Get("block.dirt");
     const float groundTop = static_cast<float>(GameConfig::WindowHeight) - GroundHeight;
 
     platforms.emplace_back(0.0f, groundTop, static_cast<float>(GameConfig::WindowWidth), GroundHeight,
-        brickSprite, BrickTileSize, BrickTileSize);
+        groundSprite, GroundTileSize, GroundTileSize);
     platforms.emplace_back(320.0f, groundTop - RaisedPlatformHeight, 160.0f, RaisedPlatformHeight,
-        brickSprite, BrickTileSize, BrickTileSize);
+        groundSprite, GroundTileSize, GroundTileSize);
 
     for (const Platform& platform : platforms)
     {

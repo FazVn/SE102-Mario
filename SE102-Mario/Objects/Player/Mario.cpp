@@ -42,6 +42,16 @@ namespace
         const float jumpHeight = marioHeightMeters * Mario::JumpHeightMultiplier;
         return std::sqrt(2.0f * Mario::Gravity * jumpHeight);
     }
+
+    bool HasHorizontalOverlap(const RectF& first, const RectF& second)
+    {
+        return first.left < second.right && first.right > second.left;
+    }
+
+    bool HasVerticalOverlap(const RectF& first, const RectF& second)
+    {
+        return first.top < second.bottom && first.bottom > second.top;
+    }
 }
 
 Mario::Mario()
@@ -77,6 +87,7 @@ void Mario::SetPosition(float newX, float newY)
 {
     GameObject::SetPosition(newX, newY);
     SyncPhysicsFromPixels();
+    previousPixelX = newX;
     previousPixelY = newY;
 }
 
@@ -95,6 +106,7 @@ void Mario::SetOnGround(bool value)
 
 void Mario::Update(const Input& input, float deltaTime)
 {
+    previousPixelX = x;
     previousPixelY = y;
 
     const bool moveLeft = input.IsKeyDown(VK_LEFT) || input.IsKeyDown('A');
@@ -148,19 +160,21 @@ void Mario::Update(const Input& input, float deltaTime)
     UpdateState();
 }
 
-void Mario::ResolveVerticalCollision(const std::vector<RectF>& solidBounds)
+void Mario::ResolveSolidCollisions(const std::vector<RectF>& solidBounds)
 {
-    const RectF marioBounds = GetBoundingBox();
+    RectF marioBounds = GetBoundingBox();
+    const float previousTop = previousPixelY;
     const float previousBottom = previousPixelY + height;
     bool landed = false;
     float landingTop = 0.0f;
+    bool hitCeiling = false;
+    float ceilingBottom = 0.0f;
 
     if (velocityMetersY >= 0.0f)
     {
         for (const RectF& solidBoundsItem : solidBounds)
         {
-            const bool overlapsHorizontally = marioBounds.left < solidBoundsItem.right &&
-                marioBounds.right > solidBoundsItem.left;
+            const bool overlapsHorizontally = HasHorizontalOverlap(marioBounds, solidBoundsItem);
             const bool crossedPlatformTop = previousBottom <= solidBoundsItem.top &&
                 marioBounds.bottom >= solidBoundsItem.top;
             const bool isAbovePlatformBottom = marioBounds.top < solidBoundsItem.bottom;
@@ -175,6 +189,25 @@ void Mario::ResolveVerticalCollision(const std::vector<RectF>& solidBounds)
             }
         }
     }
+    else
+    {
+        for (const RectF& solidBoundsItem : solidBounds)
+        {
+            const bool overlapsHorizontally = HasHorizontalOverlap(marioBounds, solidBoundsItem);
+            const bool crossedPlatformBottom = previousTop >= solidBoundsItem.bottom &&
+                marioBounds.top <= solidBoundsItem.bottom;
+            const bool isBelowPlatformTop = marioBounds.bottom > solidBoundsItem.top;
+
+            if (overlapsHorizontally && crossedPlatformBottom && isBelowPlatformTop)
+            {
+                if (!hitCeiling || solidBoundsItem.bottom > ceilingBottom)
+                {
+                    hitCeiling = true;
+                    ceilingBottom = solidBoundsItem.bottom;
+                }
+            }
+        }
+    }
 
     if (landed)
     {
@@ -182,13 +215,85 @@ void Mario::ResolveVerticalCollision(const std::vector<RectF>& solidBounds)
         velocityMetersY = 0.0f;
         onGround = true;
     }
+    else if (hitCeiling)
+    {
+        positionMetersY = PixelsToMeters(ceilingBottom);
+        velocityMetersY = 0.0f;
+        onGround = false;
+    }
     else
     {
         onGround = false;
     }
 
     SyncPixelsFromPhysics();
+    marioBounds = GetBoundingBox();
+
+    const float previousLeft = previousPixelX;
+    const float previousRight = previousPixelX + width;
+    bool hitWall = false;
+    float wallEdge = 0.0f;
+
+    if (velocityMetersX > 0.0f)
+    {
+        for (const RectF& solidBoundsItem : solidBounds)
+        {
+            const bool overlapsVertically = HasVerticalOverlap(marioBounds, solidBoundsItem);
+            const bool crossedLeftEdge = previousRight <= solidBoundsItem.left &&
+                marioBounds.right >= solidBoundsItem.left;
+
+            if (overlapsVertically && crossedLeftEdge)
+            {
+                if (!hitWall || solidBoundsItem.left < wallEdge)
+                {
+                    hitWall = true;
+                    wallEdge = solidBoundsItem.left;
+                }
+            }
+        }
+
+        if (hitWall)
+        {
+            positionMetersX = PixelsToMeters(wallEdge - width);
+            velocityMetersX = 0.0f;
+        }
+    }
+    else if (velocityMetersX < 0.0f)
+    {
+        for (const RectF& solidBoundsItem : solidBounds)
+        {
+            const bool overlapsVertically = HasVerticalOverlap(marioBounds, solidBoundsItem);
+            const bool crossedRightEdge = previousLeft >= solidBoundsItem.right &&
+                marioBounds.left <= solidBoundsItem.right;
+
+            if (overlapsVertically && crossedRightEdge)
+            {
+                if (!hitWall || solidBoundsItem.right > wallEdge)
+                {
+                    hitWall = true;
+                    wallEdge = solidBoundsItem.right;
+                }
+            }
+        }
+
+        if (hitWall)
+        {
+            positionMetersX = PixelsToMeters(wallEdge);
+            velocityMetersX = 0.0f;
+        }
+    }
+
+    if (hitWall)
+    {
+        SyncPixelsFromPhysics();
+    }
+
     UpdateState();
+}
+
+void Mario::ResolveVerticalCollision(const std::vector<RectF>& solidBounds)
+{
+    ResolveSolidCollisions(solidBounds);
 }
 
 void Mario::Render(Renderer& renderer)

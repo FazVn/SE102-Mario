@@ -48,6 +48,7 @@ public:
     void SetOnGround(bool value);
 
     void Update(const Input& input, float deltaTime);
+    void ResolveSolidCollisions(const std::vector<RectF>& solidBounds);
     void ResolveVerticalCollision(const std::vector<RectF>& solidBounds);
     void Render(Renderer& renderer) override;
 
@@ -68,6 +69,7 @@ private:
     float positionMetersY = 0.0f;
     float velocityMetersX = 0.0f;
     float velocityMetersY = 0.0f;
+    float previousPixelX = 0.0f;
     float previousPixelY = 0.0f;
 
     FacingDirection facingDirection = FacingDirection::Right;
