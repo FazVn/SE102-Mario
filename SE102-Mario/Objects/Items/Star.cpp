@@ -1,4 +1,4 @@
-#include "Mushroom.h"
+#include "Star.h"
 
 #include "../../Core/Renderer.h"
 #include "../../Core/Sprite.h"
@@ -7,9 +7,11 @@
 
 namespace
 {
-    constexpr float MushroomSize = 32.0f;
-    constexpr float MushroomSpeed = 72.0f;
-    constexpr float ItemGravityPixels = 980.0f;
+    constexpr float StarSize = 32.0f;
+    constexpr float StarSpeed = 120.0f;
+    constexpr float StarGravityPixels = 980.0f;
+    constexpr float StarBounceSpeed = -360.0f;
+    constexpr float FrameDuration = 0.08f;
 
     bool HasHorizontalOverlap(const RectF& first, const RectF& second)
     {
@@ -17,22 +19,25 @@ namespace
     }
 }
 
-Mushroom::Mushroom(float x, float y, const Sprite* sprite)
-    : GameObject(x, y, MushroomSize, MushroomSize),
-    sprite(sprite)
+Star::Star(float x, float y, const Sprite* yellowFrame, const Sprite* greenFrame, const Sprite* redFrame)
+    : GameObject(x, y, StarSize, StarSize),
+    yellowFrame(yellowFrame),
+    greenFrame(greenFrame),
+    redFrame(redFrame)
 {
-    SetVelocity(MushroomSpeed, -80.0f);
+    SetVelocity(StarSpeed, -220.0f);
     SetCollidable(true);
 }
 
-void Mushroom::Update(float deltaTime, const std::vector<RectF>& solidBounds, float levelHeight)
+void Star::Update(float deltaTime, const std::vector<RectF>& solidBounds, float levelHeight)
 {
     if (!IsActive())
     {
         return;
     }
 
-    velocityY += ItemGravityPixels * deltaTime;
+    animationTime += deltaTime;
+    velocityY += StarGravityPixels * deltaTime;
 
     const float previousX = x;
     x += velocityX * deltaTime;
@@ -72,7 +77,7 @@ void Mushroom::Update(float deltaTime, const std::vector<RectF>& solidBounds, fl
     if (landed)
     {
         y = landingTop - height;
-        velocityY = 0.0f;
+        velocityY = StarBounceSpeed;
     }
 
     if (y > levelHeight + 128.0f)
@@ -81,16 +86,32 @@ void Mushroom::Update(float deltaTime, const std::vector<RectF>& solidBounds, fl
     }
 }
 
-void Mushroom::RenderAt(Renderer& renderer, float offsetX, float offsetY)
+void Star::RenderAt(Renderer& renderer, float offsetX, float offsetY)
 {
-    if (!IsVisible() || !sprite)
+    const Sprite* frame = GetCurrentFrame();
+    if (!IsVisible() || !frame)
     {
         return;
     }
 
-    renderer.DrawSprite(*sprite,
+    renderer.DrawSprite(*frame,
         static_cast<int>(std::lround(x - offsetX)),
         static_cast<int>(std::lround(y - offsetY)),
         static_cast<int>(std::lround(width)),
         static_cast<int>(std::lround(height)));
+}
+
+const Sprite* Star::GetCurrentFrame() const
+{
+    const int frameIndex = static_cast<int>(animationTime / FrameDuration) % 3;
+    if (frameIndex == 1)
+    {
+        return greenFrame ? greenFrame : yellowFrame;
+    }
+    if (frameIndex == 2)
+    {
+        return redFrame ? redFrame : yellowFrame;
+    }
+
+    return yellowFrame;
 }

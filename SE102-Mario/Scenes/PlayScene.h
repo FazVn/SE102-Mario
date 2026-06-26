@@ -5,9 +5,15 @@
 #include "../Core/FontManager.h"
 #include "../Core/SpriteManager.h"
 #include "../Core/TextureManager.h"
+#include "../Objects/Blocks/QuestionBlock.h"
+#include "../Objects/Enemies/Enemy.h"
 #include "../Objects/GameObject.h"
+#include "../Objects/Items/Coin.h"
+#include "../Objects/Items/Mushroom.h"
+#include "../Objects/Items/Star.h"
 #include "../Objects/Player/Mario.h"
 
+#include <memory>
 #include <string>
 #include <vector>
 #include <windows.h>
@@ -50,27 +56,6 @@ private:
         int tileHeight = 32;
     };
 
-    struct CoinInstance
-    {
-        SpriteInstance visual;
-        bool active = true;
-        float animationTime = 0.0f;
-    };
-
-    struct EnemyInstance
-    {
-        const Sprite* walkFrame1 = nullptr;
-        const Sprite* walkFrame2 = nullptr;
-        float x = 0.0f;
-        float y = 0.0f;
-        float width = 32.0f;
-        float height = 32.0f;
-        float velocityX = -42.0f;
-        float velocityY = 0.0f;
-        float animationTime = 0.0f;
-        bool active = true;
-    };
-
     bool LoadLevelFromFile(const std::wstring& resourceRelativePath);
     void BuildFallbackLevel();
     void ClearLevel();
@@ -82,9 +67,12 @@ private:
     void AddStaircase(float x, float y, int steps, int direction);
     void AddEnemy(const std::string& enemyType, float x, float y);
     void AddCoin(float x, float y);
+    void AddQuestionBlock(float x, float y, QuestionBlock::Content content);
+    void SpawnQuestionBlockContent(const QuestionBlock& block);
     void UpdateCamera();
+    void UpdateQuestionBlocks(float deltaTime);
     bool UpdateEnemies(float deltaTime);
-    void UpdateCoins();
+    void UpdateItems(float deltaTime);
     void UpdateMarioSprite(float deltaTime);
     void RenderSpriteInstance(Renderer& renderer, const SpriteInstance& instance);
     void RenderTiledSpriteInstance(Renderer& renderer, const TiledSpriteInstance& instance);
@@ -99,8 +87,11 @@ private:
     std::vector<SpriteInstance> backgroundSprites;
     std::vector<SpriteInstance> solidSprites;
     std::vector<TiledSpriteInstance> tiledSprites;
-    std::vector<CoinInstance> coins;
-    std::vector<EnemyInstance> enemies;
+    std::vector<std::unique_ptr<QuestionBlock>> questionBlocks;
+    std::vector<std::unique_ptr<Coin>> coins;
+    std::vector<std::unique_ptr<Mushroom>> mushrooms;
+    std::vector<std::unique_ptr<Star>> stars;
+    std::vector<std::unique_ptr<Enemy>> enemies;
     std::vector<RectF> solidBounds;
 
     RectF winBounds{};

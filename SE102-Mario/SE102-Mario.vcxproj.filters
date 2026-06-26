@@ -151,6 +151,9 @@
     <ClCompile Include="Objects\Items\Mushroom.cpp">
       <Filter>Objects\Items</Filter>
     </ClCompile>
+    <ClCompile Include="Objects\Items\Star.cpp">
+      <Filter>Objects\Items</Filter>
+    </ClCompile>
     <ClCompile Include="Objects\Environment\Platform.cpp">
       <Filter>Objects\Environment</Filter>
     </ClCompile>
@@ -271,6 +274,9 @@
       <Filter>Objects\Items</Filter>
     </ClInclude>
     <ClInclude Include="Objects\Items\Mushroom.h">
+      <Filter>Objects\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\Items\Star.h">
       <Filter>Objects\Items</Filter>
     </ClInclude>
     <ClInclude Include="Objects\Environment\Platform.h">

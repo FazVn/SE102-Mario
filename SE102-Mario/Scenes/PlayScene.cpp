@@ -5,6 +5,8 @@
 #include "../Core/Input.h"
 #include "../Core/Renderer.h"
 #include "../Core/Sprite.h"
+#include "../Objects/Enemies/Goomba.h"
+#include "../Objects/Enemies/Koopa.h"
 #include "SceneManager.h"
 
 #include <algorithm>
@@ -12,6 +14,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -27,18 +30,12 @@ namespace
 {
     constexpr int TileSize = 32;
     constexpr float MaxPhysicsDeltaTime = 0.05f;
-    constexpr float EnemyGravityPixels = 980.0f;
     constexpr float MarioRenderWidth = 32.0f;
     constexpr float MarioRenderHeight = 48.0f;
 
     RectF MakeRect(float x, float y, float width, float height)
     {
         return RectF{ x, y, x + width, y + height };
-    }
-
-    bool HasHorizontalOverlap(const RectF& first, const RectF& second)
-    {
-        return first.left < second.right && first.right > second.left;
     }
 
     std::string Trim(const std::string& value)
@@ -61,6 +58,26 @@ namespace
         std::transform(value.begin(), value.end(), value.begin(),
             [](unsigned char character) { return static_cast<char>(std::toupper(character)); });
         return value;
+    }
+
+    QuestionBlock::Content ParseQuestionBlockContent(const std::string& value)
+    {
+        const std::string upperValue = ToUpper(value);
+        if (upperValue == "MUSHROOM")
+        {
+            return QuestionBlock::Content::Mushroom;
+        }
+        if (upperValue == "STAR")
+        {
+            return QuestionBlock::Content::Star;
+        }
+
+        return QuestionBlock::Content::Coin;
+    }
+
+    bool HasHorizontalOverlap(const RectF& first, const RectF& second)
+    {
+        return first.left < second.right && first.right > second.left;
     }
 }
 
@@ -157,6 +174,7 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
 
     const float physicsDeltaTime = deltaTime > MaxPhysicsDeltaTime ? MaxPhysicsDeltaTime : deltaTime;
     mario.Update(input, physicsDeltaTime);
+    UpdateQuestionBlocks(physicsDeltaTime);
     mario.ResolveSolidCollisions(solidBounds);
 
     if (mario.GetX() < 0.0f)
@@ -175,7 +193,7 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
         return;
     }
 
-    UpdateCoins();
+    UpdateItems(physicsDeltaTime);
 
     if (mario.GetY() > levelHeight + 128.0f)
     {
@@ -212,37 +230,46 @@ void PlayScene::Render(Renderer& renderer, HWND windowHandle)
         RenderSpriteInstance(renderer, sprite);
     }
 
-    for (const CoinInstance& coin : coins)
+    for (const auto& block : questionBlocks)
     {
-        if (coin.active)
+        if (block && IsVisibleInCamera(block->GetX(), block->GetWidth()))
         {
-            RenderSpriteInstance(renderer, coin.visual);
+            block->RenderAt(renderer, camera.GetX(), camera.GetY());
         }
     }
 
-    for (const EnemyInstance& enemy : enemies)
+    for (const auto& coin : coins)
     {
-        if (!enemy.active || !IsVisibleInCamera(enemy.x, enemy.width))
+        if (coin && IsVisibleInCamera(coin->GetX(), coin->GetWidth()))
+        {
+            coin->RenderAt(renderer, camera.GetX(), camera.GetY());
+        }
+    }
+
+    for (const auto& mushroom : mushrooms)
+    {
+        if (mushroom && IsVisibleInCamera(mushroom->GetX(), mushroom->GetWidth()))
+        {
+            mushroom->RenderAt(renderer, camera.GetX(), camera.GetY());
+        }
+    }
+
+    for (const auto& star : stars)
+    {
+        if (star && IsVisibleInCamera(star->GetX(), star->GetWidth()))
+        {
+            star->RenderAt(renderer, camera.GetX(), camera.GetY());
+        }
+    }
+
+    for (const auto& enemy : enemies)
+    {
+        if (!enemy || !enemy->IsActive() || !IsVisibleInCamera(enemy->GetX(), enemy->GetWidth()))
         {
             continue;
         }
 
-        const Sprite* frame = (static_cast<int>(enemy.animationTime / 0.16f) % 2 == 0)
-            ? enemy.walkFrame1
-            : enemy.walkFrame2;
-        if (!frame)
-        {
-            frame = enemy.walkFrame1 ? enemy.walkFrame1 : enemy.walkFrame2;
-        }
-
-        if (frame)
-        {
-            renderer.DrawSprite(*frame,
-                static_cast<int>(std::lround(enemy.x - camera.GetX())),
-                static_cast<int>(std::lround(enemy.y - camera.GetY())),
-                static_cast<int>(std::lround(enemy.width)),
-                static_cast<int>(std::lround(enemy.height)));
-        }
+        enemy->RenderAt(renderer, camera.GetX(), camera.GetY());
     }
 
 
@@ -390,7 +417,9 @@ bool PlayScene::LoadLevelFromFile(const std::wstring& resourceRelativePath)
             float y = 0.0f;
             if (stream >> x >> y)
             {
-                AddSolidSprite("block.question.frame1", x, y, TileSize, TileSize);
+                std::string contentName = "COIN";
+                stream >> contentName;
+                AddQuestionBlock(x, y, ParseQuestionBlockContent(contentName));
             }
         }
         else if (command == "USED_BLOCK")
@@ -490,7 +519,10 @@ void PlayScene::ClearLevel()
     backgroundSprites.clear();
     solidSprites.clear();
     tiledSprites.clear();
+    questionBlocks.clear();
     coins.clear();
+    mushrooms.clear();
+    stars.clear();
     enemies.clear();
     solidBounds.clear();
     winBounds = RectF{};
@@ -585,37 +617,81 @@ void PlayScene::AddStaircase(float x, float y, int steps, int direction)
 
 void PlayScene::AddEnemy(const std::string& enemyType, float x, float y)
 {
-    EnemyInstance enemy;
-    enemy.x = x;
-    enemy.y = y;
-
     if (enemyType == "KOOPA")
     {
-        enemy.walkFrame1 = spriteManager.Get("enemy.koopa.walk1");
-        enemy.walkFrame2 = spriteManager.Get("enemy.koopa.walk2");
-        enemy.width = 32.0f;
-        enemy.height = 48.0f;
-        enemy.velocityX = -36.0f;
+        enemies.push_back(std::make_unique<Koopa>(
+            x,
+            y,
+            spriteManager.Get("enemy.koopa.walk1"),
+            spriteManager.Get("enemy.koopa.walk2")));
     }
     else
     {
-        enemy.walkFrame1 = spriteManager.Get("enemy.goomba.walk1");
-        enemy.walkFrame2 = spriteManager.Get("enemy.goomba.walk2");
-        enemy.width = 32.0f;
-        enemy.height = 32.0f;
-        enemy.velocityX = -42.0f;
+        enemies.push_back(std::make_unique<Goomba>(
+            x,
+            y,
+            spriteManager.Get("enemy.goomba.walk1"),
+            spriteManager.Get("enemy.goomba.walk2")));
     }
-
-    enemies.push_back(enemy);
 }
 
 void PlayScene::AddCoin(float x, float y)
 {
-    CoinInstance coin;
-    coin.visual = SpriteInstance{ spriteManager.Get("item.coin.frame1"), x, y, 24.0f, 24.0f };
-    coin.active = true;
-    coin.animationTime = 0.0f;
-    coins.push_back(coin);
+    coins.push_back(std::make_unique<Coin>(
+        x,
+        y,
+        spriteManager.Get("item.coin.frame1"),
+        spriteManager.Get("item.coin.frame2"),
+        spriteManager.Get("item.coin.frame3"),
+        spriteManager.Get("item.coin.frame4")));
+}
+
+void PlayScene::AddQuestionBlock(float x, float y, QuestionBlock::Content content)
+{
+    questionBlocks.push_back(std::make_unique<QuestionBlock>(
+        x,
+        y,
+        spriteManager.Get("block.question.frame1"),
+        spriteManager.Get("block.question.frame2"),
+        spriteManager.Get("block.question.frame3"),
+        spriteManager.Get("block.used"),
+        content));
+    AddSolidRect(x, y, TileSize, TileSize);
+}
+
+void PlayScene::SpawnQuestionBlockContent(const QuestionBlock& block)
+{
+    switch (block.GetContent())
+    {
+    case QuestionBlock::Content::Mushroom:
+        mushrooms.push_back(std::make_unique<Mushroom>(
+            block.GetX(),
+            block.GetY() - 32.0f,
+            spriteManager.Get("item.mushroom.red")));
+        break;
+
+    case QuestionBlock::Content::Star:
+        stars.push_back(std::make_unique<Star>(
+            block.GetX(),
+            block.GetY() - 32.0f,
+            spriteManager.Get("item.star.yellow"),
+            spriteManager.Get("item.star.green"),
+            spriteManager.Get("item.star.red")));
+        break;
+
+    case QuestionBlock::Content::Coin:
+    default:
+        coins.push_back(std::make_unique<Coin>(
+            block.GetX() + 4.0f,
+            block.GetY() - 24.0f,
+            spriteManager.Get("item.coin.frame1"),
+            spriteManager.Get("item.coin.frame2"),
+            spriteManager.Get("item.coin.frame3"),
+            spriteManager.Get("item.coin.frame4"),
+            true));
+        ++coinsCollected;
+        break;
+    }
 }
 
 void PlayScene::UpdateCamera()
@@ -631,72 +707,29 @@ bool PlayScene::UpdateEnemies(float deltaTime)
 {
     bool hitMario = false;
 
-    for (EnemyInstance& enemy : enemies)
+    for (const auto& enemy : enemies)
     {
-        if (!enemy.active)
+        if (!enemy || !enemy->IsActive())
         {
             continue;
         }
 
-        enemy.animationTime += deltaTime;
-        enemy.velocityY += EnemyGravityPixels * deltaTime;
+        enemy->Update(deltaTime, solidBounds, levelHeight);
 
-        const float previousX = enemy.x;
-        enemy.x += enemy.velocityX * deltaTime;
-        RectF enemyBounds = MakeRect(enemy.x, enemy.y, enemy.width, enemy.height);
-
-        for (const RectF& solid : solidBounds)
-        {
-            if (enemyBounds.Intersects(solid))
-            {
-                enemy.x = previousX;
-                enemy.velocityX = -enemy.velocityX;
-                break;
-            }
-        }
-
-        const float previousY = enemy.y;
-        enemy.y += enemy.velocityY * deltaTime;
-        enemyBounds = MakeRect(enemy.x, enemy.y, enemy.width, enemy.height);
-
-        bool landed = false;
-        float landingTop = 0.0f;
-        if (enemy.velocityY >= 0.0f)
-        {
-            for (const RectF& solid : solidBounds)
-            {
-                const bool crossedTop = previousY + enemy.height <= solid.top && enemyBounds.bottom >= solid.top;
-                if (HasHorizontalOverlap(enemyBounds, solid) && crossedTop)
-                {
-                    if (!landed || solid.top < landingTop)
-                    {
-                        landed = true;
-                        landingTop = solid.top;
-                    }
-                }
-            }
-        }
-
-        if (landed)
-        {
-            enemy.y = landingTop - enemy.height;
-            enemy.velocityY = 0.0f;
-        }
-
-        if (enemy.y > levelHeight + 128.0f)
-        {
-            enemy.active = false;
-            continue;
-        }
-
-        enemyBounds = MakeRect(enemy.x, enemy.y, enemy.width, enemy.height);
+        const RectF enemyBounds = enemy->GetBoundingBox();
         const RectF marioBounds = mario.GetBoundingBox();
         if (marioBounds.Intersects(enemyBounds))
         {
+            if (mario.IsInvincible())
+            {
+                enemy->Defeat();
+                continue;
+            }
+
             const bool stomped = mario.GetVelocityY() > 0.0f && marioBounds.bottom <= enemyBounds.top + 16.0f;
             if (stomped)
             {
-                enemy.active = false;
+                enemy->Defeat();
                 mario.Bounce();
             }
             else
@@ -709,32 +742,101 @@ bool PlayScene::UpdateEnemies(float deltaTime)
     return hitMario;
 }
 
-void PlayScene::UpdateCoins()
+void PlayScene::UpdateQuestionBlocks(float deltaTime)
+{
+    const RectF previousMarioBounds = mario.GetPreviousBoundingBox();
+    const RectF marioBounds = mario.GetBoundingBox();
+    const bool marioMovingUp = mario.GetVelocityY() < 0.0f;
+
+    for (const auto& block : questionBlocks)
+    {
+        if (!block)
+        {
+            continue;
+        }
+
+        block->Update(deltaTime);
+
+        if (!marioMovingUp || block->IsUsed())
+        {
+            continue;
+        }
+
+        const RectF blockBounds = block->GetBoundingBox();
+        const bool crossedBlockBottom = previousMarioBounds.top >= blockBounds.bottom &&
+            marioBounds.top <= blockBounds.bottom;
+
+        if (crossedBlockBottom && HasHorizontalOverlap(marioBounds, blockBounds))
+        {
+            if (block->Hit())
+            {
+                SpawnQuestionBlockContent(*block);
+            }
+        }
+    }
+}
+
+void PlayScene::UpdateItems(float deltaTime)
 {
     const RectF marioBounds = mario.GetBoundingBox();
 
-    static const int frameSequence[] = { 1, 2, 3, 4, 3, 2 };
-    static const int frameCount = 6;
-    constexpr float frameDuration = 0.1f;
-
-    for (CoinInstance& coin : coins)
+    for (const auto& coin : coins)
     {
-        if (!coin.active)
-            continue;
-
-        coin.animationTime += lastDeltaTime;
-        const int frameIndex = static_cast<int>(coin.animationTime / frameDuration) % frameCount;
-        const int frameNumber = frameSequence[frameIndex];
-
-        std::string spriteId = "item.coin.frame" + std::to_string(frameNumber);
-        coin.visual.sprite = spriteManager.Get(spriteId);
-
-        if (marioBounds.Intersects(MakeRect(coin.visual.x, coin.visual.y, coin.visual.width, coin.visual.height)))
+        if (!coin || !coin->IsActive())
         {
-            coin.active = false;
+            continue;
+        }
+
+        coin->Update(deltaTime);
+
+        if (coin->IsCollidable() && marioBounds.Intersects(coin->GetBoundingBox()))
+        {
+            coin->SetActive(false);
             ++coinsCollected;
         }
     }
+
+    for (const auto& mushroom : mushrooms)
+    {
+        if (!mushroom || !mushroom->IsActive())
+        {
+            continue;
+        }
+
+        mushroom->Update(deltaTime, solidBounds, levelHeight);
+        if (marioBounds.Intersects(mushroom->GetBoundingBox()))
+        {
+            mushroom->SetActive(false);
+            mario.SetRenderSize(static_cast<int>(MarioRenderWidth), static_cast<int>(MarioRenderHeight));
+        }
+    }
+
+    for (const auto& star : stars)
+    {
+        if (!star || !star->IsActive())
+        {
+            continue;
+        }
+
+        star->Update(deltaTime, solidBounds, levelHeight);
+        if (marioBounds.Intersects(star->GetBoundingBox()))
+        {
+            star->SetActive(false);
+            mario.ActivateStarPower();
+        }
+    }
+
+    coins.erase(std::remove_if(coins.begin(), coins.end(),
+        [](const std::unique_ptr<Coin>& coin) { return !coin || coin->IsFinished(); }),
+        coins.end());
+
+    mushrooms.erase(std::remove_if(mushrooms.begin(), mushrooms.end(),
+        [](const std::unique_ptr<Mushroom>& mushroom) { return !mushroom || !mushroom->IsActive(); }),
+        mushrooms.end());
+
+    stars.erase(std::remove_if(stars.begin(), stars.end(),
+        [](const std::unique_ptr<Star>& star) { return !star || !star->IsActive(); }),
+        stars.end());
 }
 
 void PlayScene::UpdateMarioSprite(float deltaTime)

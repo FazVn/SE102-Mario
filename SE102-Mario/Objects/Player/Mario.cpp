@@ -117,6 +117,20 @@ void Mario::Update(const Input& input, float deltaTime)
     previousPixelX = x;
     previousPixelY = y;
 
+    if (starPowerTimer > 0.0f)
+    {
+        starPowerTimer -= deltaTime;
+        if (starPowerTimer < 0.0f)
+        {
+            starPowerTimer = 0.0f;
+        }
+    }
+
+    const float speedMultiplier = IsInvincible() ? StarPowerSpeedMultiplier : 1.0f;
+    const float maxRunSpeed = MaxRunSpeed * speedMultiplier;
+    const float runAcceleration = RunAcceleration * speedMultiplier;
+    const float runDeceleration = RunDeceleration * speedMultiplier;
+
     const bool moveLeft = input.IsKeyDown(VK_LEFT) || input.IsKeyDown('A');
     const bool moveRight = input.IsKeyDown(VK_RIGHT) || input.IsKeyDown('D');
     float inputDirection = 0.0f;
@@ -133,7 +147,7 @@ void Mario::Update(const Input& input, float deltaTime)
 
     if (inputDirection == 0.0f)
     {
-        velocityMetersX = MoveTowards(velocityMetersX, 0.0f, RunDeceleration * deltaTime);
+        velocityMetersX = MoveTowards(velocityMetersX, 0.0f, runDeceleration * deltaTime);
     }
     else
     {
@@ -144,13 +158,13 @@ void Mario::Update(const Input& input, float deltaTime)
 
         if (braking)
         {
-            const float activeDeceleration = RunDeceleration + RunAcceleration;
+            const float activeDeceleration = runDeceleration + runAcceleration;
             velocityMetersX = MoveTowards(velocityMetersX, 0.0f, activeDeceleration * deltaTime);
         }
         else
         {
-            velocityMetersX += inputDirection * RunAcceleration * deltaTime;
-            velocityMetersX = std::clamp(velocityMetersX, -MaxRunSpeed, MaxRunSpeed);
+            velocityMetersX += inputDirection * runAcceleration * deltaTime;
+            velocityMetersX = std::clamp(velocityMetersX, -maxRunSpeed, maxRunSpeed);
         }
     }
 
@@ -331,6 +345,16 @@ bool Mario::IsOnGround() const
     return onGround;
 }
 
+bool Mario::IsInvincible() const
+{
+    return starPowerTimer > 0.0f;
+}
+
+RectF Mario::GetPreviousBoundingBox() const
+{
+    return RectF{ previousPixelX, previousPixelY, previousPixelX + width, previousPixelY + height };
+}
+
 Mario::FacingDirection Mario::GetFacingDirection() const
 {
     return facingDirection;
@@ -339,6 +363,11 @@ Mario::FacingDirection Mario::GetFacingDirection() const
 Mario::State Mario::GetState() const
 {
     return state;
+}
+
+void Mario::ActivateStarPower()
+{
+    starPowerTimer = StarPowerDuration;
 }
 
 void Mario::SyncPixelsFromPhysics()

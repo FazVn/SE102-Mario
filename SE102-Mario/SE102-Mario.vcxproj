@@ -29,26 +29,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -171,6 +171,7 @@
     <ClCompile Include="Objects\Blocks\QuestionBlock.cpp" />
     <ClCompile Include="Objects\Items\Coin.cpp" />
     <ClCompile Include="Objects\Items\Mushroom.cpp" />
+    <ClCompile Include="Objects\Items\Star.cpp" />
     <ClCompile Include="Objects\Environment\Platform.cpp" />
     <ClCompile Include="Objects\Environment\Pipe.cpp" />
     <ClCompile Include="Objects\Environment\Portal.cpp" />
@@ -213,6 +214,7 @@
     <ClInclude Include="Objects\Blocks\QuestionBlock.h" />
     <ClInclude Include="Objects\Items\Coin.h" />
     <ClInclude Include="Objects\Items\Mushroom.h" />
+    <ClInclude Include="Objects\Items\Star.h" />
     <ClInclude Include="Objects\Environment\Platform.h" />
     <ClInclude Include="Objects\Environment\Pipe.h" />
     <ClInclude Include="Objects\Environment\Portal.h" />

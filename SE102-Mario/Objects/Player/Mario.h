@@ -38,6 +38,8 @@ public:
     static constexpr float RunAcceleration = 3.0f;
     static constexpr float RunDeceleration = 3.0f;
     static constexpr float JumpHeightMultiplier = 3.25f;
+    static constexpr float StarPowerDuration = 10.0f;
+    static constexpr float StarPowerSpeedMultiplier = 1.45f;
 
     Mario();
     Mario(float x, float y, const Sprite* sprite, int renderWidth = DefaultRenderWidth, int renderHeight = DefaultRenderHeight);
@@ -55,8 +57,11 @@ public:
     void RenderAt(Renderer& renderer, float offsetX, float offsetY);
 
     bool IsOnGround() const;
+    bool IsInvincible() const;
+    RectF GetPreviousBoundingBox() const;
     FacingDirection GetFacingDirection() const;
     State GetState() const;
+    void ActivateStarPower();
 
 private:
     void SyncPixelsFromPhysics();
@@ -77,4 +82,5 @@ private:
     FacingDirection facingDirection = FacingDirection::Right;
     State state = State::Idle;
     bool onGround = false;
+    float starPowerTimer = 0.0f;
 };

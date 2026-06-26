@@ -7,19 +7,19 @@
 class Renderer;
 class Sprite;
 
-class Enemy : public GameObject
+class Star : public GameObject
 {
 public:
-    Enemy(float x, float y, float width, float height, float velocityX, const Sprite* walkFrame1, const Sprite* walkFrame2);
+    Star(float x, float y, const Sprite* yellowFrame, const Sprite* greenFrame, const Sprite* redFrame);
 
     void Update(float deltaTime, const std::vector<RectF>& solidBounds, float levelHeight);
     void RenderAt(Renderer& renderer, float offsetX, float offsetY);
-    void Defeat();
 
 private:
     const Sprite* GetCurrentFrame() const;
 
-    const Sprite* walkFrame1 = nullptr;
-    const Sprite* walkFrame2 = nullptr;
+    const Sprite* yellowFrame = nullptr;
+    const Sprite* greenFrame = nullptr;
+    const Sprite* redFrame = nullptr;
     float animationTime = 0.0f;
 };
