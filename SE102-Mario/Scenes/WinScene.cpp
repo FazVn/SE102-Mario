@@ -3,6 +3,7 @@
 #include "../Core/Input.h"
 #include "../Core/Renderer.h"
 #include "SceneManager.h"
+#include <windows.h> 
 
 void WinScene::Update(SceneManager& sceneManager, const Input& input, float)
 {
