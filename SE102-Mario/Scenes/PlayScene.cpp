@@ -113,6 +113,48 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
     if (input.WasKeyPressed('H'))
         sceneManager.RequestChange(SceneId::Win);
 
+    if (input.WasKeyPressed(VK_ESCAPE))
+    {
+        isPaused = !isPaused;
+        selectedPause = 0;
+        return;
+    }
+
+    if (isPaused)
+    {
+        if (input.WasKeyPressed(VK_UP))
+        {
+            selectedPause--;
+            if (selectedPause < 0)
+                selectedPause = 2;
+        }
+
+        if (input.WasKeyPressed(VK_DOWN))
+        {
+            selectedPause++;
+            if (selectedPause > 2)
+                selectedPause = 0;
+        }
+
+        if (input.WasKeyPressed(VK_RETURN))
+        {
+            if (selectedPause == 0)
+            {
+                isPaused = false; 
+            }
+            else if (selectedPause == 1)
+            {
+                sceneManager.RequestChange(SceneId::Menu);
+            }
+            else
+            {
+                PostQuitMessage(0);
+            }
+        }
+
+        return; 
+    }
+
     const float physicsDeltaTime = deltaTime > MaxPhysicsDeltaTime ? MaxPhysicsDeltaTime : deltaTime;
     mario.Update(input, physicsDeltaTime);
     mario.ResolveSolidCollisions(solidBounds);
@@ -203,10 +245,33 @@ void PlayScene::Render(Renderer& renderer, HWND windowHandle)
         }
     }
 
+
     mario.RenderAt(renderer, camera.GetX(), camera.GetY());
 
     renderer.DrawTextLine(L"WORLD 1-1", 24, 14, 20, RGB(255, 255, 255), marioFontFamily.c_str(), FW_BOLD);
     renderer.DrawTextLine(L"COIN " + std::to_wstring(coinsCollected), 300, 14, 20, RGB(255, 255, 255), marioFontFamily.c_str(), FW_BOLD);
+
+    if (isPaused)
+    {
+        renderer.DrawCenteredText(
+            L"PAUSED", 80, 60, 42, RGB(255, 255, 255));
+
+        if (selectedPause == 0)
+            renderer.DrawCenteredText(L"> RESUME <", 170, 40, 28, RGB(255, 230, 80));
+        else
+            renderer.DrawCenteredText(L"RESUME", 170, 40, 28, RGB(180, 180, 180));
+
+        if (selectedPause == 1)
+            renderer.DrawCenteredText(L"> RETURN TO MENU <", 220, 40, 28, RGB(255, 230, 80));
+        else
+            renderer.DrawCenteredText(L"RETURN TO MENU", 220, 40, 28, RGB(180, 180, 180));
+
+        if (selectedPause == 2)
+            renderer.DrawCenteredText(L"> EXIT <", 270, 40, 28, RGB(255, 230, 80));
+        else
+            renderer.DrawCenteredText(L"EXIT", 270, 40, 28, RGB(180, 180, 180));
+    }
+
 
     renderer.End();
 }

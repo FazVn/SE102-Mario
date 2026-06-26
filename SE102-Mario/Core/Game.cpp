@@ -49,9 +49,7 @@ bool Game::Initialize(int showCommand)
     ShowWindow(windowHandle, showCommand);
     UpdateWindow(windowHandle);
 
-    //============================
-    // Load toàn bộ texture
-    //============================
+
     if (!textureManager.LoadFromDefinitionFile(
         L"Resources\\definitions\\textures.txt"))
     {
@@ -64,9 +62,7 @@ bool Game::Initialize(int showCommand)
         return false;
     }
 
-    //============================
-    // Khởi tạo SceneManager
-    //============================
+
     sceneManager.SetFactory(
         std::make_unique<SceneFactory>(textureManager));
 
@@ -204,14 +200,6 @@ LRESULT Game::HandleMessage(
 
 void Game::Update(float deltaTime)
 {
-    if (input.WasKeyPressed(VK_ESCAPE))
-    {
-        isRunning = false;
-
-        PostQuitMessage(0);
-
-        return;
-    }
 
     sceneManager.Update(input, deltaTime);
 

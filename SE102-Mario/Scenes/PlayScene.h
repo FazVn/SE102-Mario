@@ -113,4 +113,6 @@ private:
     bool assetsLoaded = false;
     std::wstring marioFontFamily;
     float lastDeltaTime = 0.0f;
+    bool isPaused = false;
+    int selectedPause = 0;
 };

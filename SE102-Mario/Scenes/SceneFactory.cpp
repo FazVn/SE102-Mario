@@ -4,6 +4,7 @@
 
 #include "GameOverScene.h"
 #include "MenuScene.h"
+#include "PauseScene.h"
 #include "PlayScene.h"
 #include "WinScene.h"
 
@@ -21,6 +22,9 @@ std::unique_ptr<IScene> SceneFactory::Create(SceneId sceneId) const
 
     case SceneId::Play:
         return std::make_unique<PlayScene>(textureManager);
+
+    case SceneId::Pause:                        
+        return std::make_unique<PauseScene>();
 
     case SceneId::GameOver:
         return std::make_unique<GameOverScene>();

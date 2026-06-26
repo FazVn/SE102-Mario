@@ -143,6 +143,7 @@
     <ClCompile Include="Core\Renderer.cpp" />
     <ClCompile Include="Scenes\GameOverScene.cpp" />
     <ClCompile Include="Scenes\MenuScene.cpp" />
+    <ClCompile Include="Scenes\PauseScene.cpp" />
     <ClCompile Include="Scenes\PlayScene.cpp" />
     <ClCompile Include="Scenes\SceneFactory.cpp" />
     <ClCompile Include="Scenes\SceneManager.cpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="Scenes\GameOverScene.h" />
     <ClInclude Include="Scenes\IScene.h" />
     <ClInclude Include="Scenes\MenuScene.h" />
+    <ClInclude Include="Scenes\PauseScene.h" />
     <ClInclude Include="Scenes\PlayScene.h" />
     <ClInclude Include="Scenes\SceneFactory.h" />
     <ClInclude Include="Scenes\SceneId.h" />

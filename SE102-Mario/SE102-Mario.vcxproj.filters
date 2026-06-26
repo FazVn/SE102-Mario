@@ -160,6 +160,9 @@
     <ClCompile Include="Objects\Environment\Portal.cpp">
       <Filter>Objects\Environment</Filter>
     </ClCompile>
+    <ClCompile Include="Scenes\PauseScene.cpp">
+      <Filter>Scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Game.h">
@@ -278,6 +281,9 @@
     </ClInclude>
     <ClInclude Include="Objects\Environment\Portal.h">
       <Filter>Objects\Environment</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\PauseScene.h">
+      <Filter>Scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
