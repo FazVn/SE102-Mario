@@ -45,3 +45,13 @@ void SceneManager::Render(Renderer& renderer, HWND windowHandle)
         currentScene->Render(renderer, windowHandle);
     }
 }
+
+void SceneManager::SetTextureManager(TextureManager* manager)
+{
+    textureManager = manager;
+}
+
+TextureManager& SceneManager::GetTextureManager()
+{
+    return *textureManager;
+}

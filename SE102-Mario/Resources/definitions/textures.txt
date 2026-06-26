@@ -7,3 +7,4 @@ enemies textures/enemies-6.png
 items_blocks textures/items-blocks.png
 dirt_block textures/dirt-block.png
 misc_8 textures/misc-8.png
+play_button textures/Play_Button.png

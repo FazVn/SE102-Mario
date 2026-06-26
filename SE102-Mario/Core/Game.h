@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "../Scenes/SceneManager.h"
 #include <windows.h>
+#include "TextureManager.h"
 
 class Game
 {
@@ -26,5 +27,6 @@ private:
 
     Input input;
     Renderer renderer;
+	TextureManager textureManager;
     SceneManager sceneManager;
 };

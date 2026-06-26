@@ -1,4 +1,4 @@
-#include "PlayScene.h"
+﻿#include "PlayScene.h"
 
 #include "../Core/GameConfig.h"
 #include "../Core/Input.h"
@@ -16,10 +16,14 @@ namespace
     constexpr float MaxPhysicsDeltaTime = 0.05f;
 }
 
+PlayScene::PlayScene(TextureManager& textures)
+    : textureManager(textures)
+{
+}
+
 void PlayScene::Load()
 {
-    assetsLoaded = textureManager.LoadFromDefinitionFile(L"definitions/textures.txt");
-    assetsLoaded = spriteManager.LoadFromDefinitionFile(L"definitions/sprites.txt", textureManager) && assetsLoaded;
+    assetsLoaded = spriteManager.LoadFromDefinitionFile(L"definitions/sprites.txt", textureManager);
 
     if (fontManager.Load("mario", L"fonts/SS-Mario-Regular.otf", L"SS Mario"))
     {
@@ -39,7 +43,6 @@ void PlayScene::Unload()
     platforms.clear();
     solidBounds.clear();
     spriteManager.Clear();
-    textureManager.Clear();
     fontManager.Clear();
 }
 
@@ -54,6 +57,9 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
     {
         sceneManager.RequestChange(SceneId::Play);
     }
+
+    if (input.WasKeyPressed('W'))
+        sceneManager.RequestChange(SceneId::Win);
 
     const float physicsDeltaTime = deltaTime > MaxPhysicsDeltaTime ? MaxPhysicsDeltaTime : deltaTime;
     mario.Update(input, physicsDeltaTime);

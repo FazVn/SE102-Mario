@@ -1,4 +1,4 @@
-#include "Game.h"
+﻿#include "Game.h"
 #include "GameConfig.h"
 #include "../Scenes/SceneFactory.h"
 
@@ -49,7 +49,27 @@ bool Game::Initialize(int showCommand)
     ShowWindow(windowHandle, showCommand);
     UpdateWindow(windowHandle);
 
-    sceneManager.SetFactory(std::make_unique<SceneFactory>());
+    //============================
+    // Load toàn bộ texture
+    //============================
+    if (!textureManager.LoadFromDefinitionFile(
+        L"Resources\\definitions\\textures.txt"))
+    {
+        MessageBoxW(
+            windowHandle,
+            L"Cannot load textures.txt",
+            L"Error",
+            MB_OK | MB_ICONERROR);
+
+        return false;
+    }
+
+    //============================
+    // Khởi tạo SceneManager
+    //============================
+    sceneManager.SetFactory(
+        std::make_unique<SceneFactory>(textureManager));
+
     sceneManager.RequestChange(SceneId::Menu);
     sceneManager.ApplyPendingChange();
 
@@ -59,7 +79,9 @@ bool Game::Initialize(int showCommand)
 int Game::Run()
 {
     isRunning = true;
+
     MSG message{};
+
     auto previousTime = std::chrono::high_resolution_clock::now();
 
     while (isRunning)
@@ -78,60 +100,105 @@ int Game::Run()
             DispatchMessageW(&message);
         }
 
-        const auto currentTime = std::chrono::high_resolution_clock::now();
-        const std::chrono::duration<float> elapsed = currentTime - previousTime;
+        auto currentTime = std::chrono::high_resolution_clock::now();
+
+        std::chrono::duration<float> elapsed =
+            currentTime - previousTime;
+
         previousTime = currentTime;
 
         Update(elapsed.count());
+
         Render();
+
         Sleep(16);
     }
 
     return static_cast<int>(message.wParam);
 }
 
-LRESULT CALLBACK Game::WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK Game::WindowProc(
+    HWND hwnd,
+    UINT message,
+    WPARAM wParam,
+    LPARAM lParam)
 {
     Game* game = nullptr;
 
     if (message == WM_NCCREATE)
     {
-        auto* createStruct = reinterpret_cast<CREATESTRUCTW*>(lParam);
-        game = static_cast<Game*>(createStruct->lpCreateParams);
-        SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(game));
+        auto* createStruct =
+            reinterpret_cast<CREATESTRUCTW*>(lParam);
+
+        game =
+            static_cast<Game*>(createStruct->lpCreateParams);
+
+        SetWindowLongPtrW(
+            hwnd,
+            GWLP_USERDATA,
+            reinterpret_cast<LONG_PTR>(game));
     }
     else
     {
-        game = reinterpret_cast<Game*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+        game =
+            reinterpret_cast<Game*>(
+                GetWindowLongPtrW(hwnd, GWLP_USERDATA));
     }
 
     if (game)
     {
-        return game->HandleMessage(hwnd, message, wParam, lParam);
+        return game->HandleMessage(
+            hwnd,
+            message,
+            wParam,
+            lParam);
     }
 
-    return DefWindowProcW(hwnd, message, wParam, lParam);
+    return DefWindowProcW(
+        hwnd,
+        message,
+        wParam,
+        lParam);
 }
 
-LRESULT Game::HandleMessage(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT Game::HandleMessage(
+    HWND hwnd,
+    UINT message,
+    WPARAM wParam,
+    LPARAM lParam)
 {
     switch (message)
     {
     case WM_KEYDOWN:
+
         if ((lParam & (1 << 30)) == 0)
         {
             input.SetKeyState(wParam, true);
         }
+
         return 0;
+
     case WM_KEYUP:
+
         input.SetKeyState(wParam, false);
+
         return 0;
+
     case WM_DESTROY:
+
         isRunning = false;
+
         PostQuitMessage(0);
+
         return 0;
+
     default:
-        return DefWindowProcW(hwnd, message, wParam, lParam);
+
+        return DefWindowProcW(
+            hwnd,
+            message,
+            wParam,
+            lParam);
     }
 }
 
@@ -140,15 +207,20 @@ void Game::Update(float deltaTime)
     if (input.WasKeyPressed(VK_ESCAPE))
     {
         isRunning = false;
+
         PostQuitMessage(0);
+
         return;
     }
 
     sceneManager.Update(input, deltaTime);
+
     sceneManager.ApplyPendingChange();
 }
 
 void Game::Render()
 {
-    sceneManager.Render(renderer, windowHandle);
+    sceneManager.Render(
+        renderer,
+        windowHandle);
 }

@@ -2,6 +2,7 @@
 
 #include "IScene.h"
 #include "SceneFactory.h"
+#include "../Core/TextureManager.h"
 #include "SceneId.h"
 #include <memory>
 #include <optional>
@@ -21,8 +22,13 @@ public:
     void Update(const Input& input, float deltaTime);
     void Render(Renderer& renderer, HWND windowHandle);
 
+    void SetTextureManager(TextureManager* manager);
+    TextureManager& GetTextureManager();
+
 private:
     std::unique_ptr<SceneFactory> factory;
     std::unique_ptr<IScene> currentScene;
     std::optional<SceneId> pendingScene;
+
+    TextureManager* textureManager = nullptr;
 };
