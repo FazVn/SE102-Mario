@@ -87,7 +87,7 @@ block.brightyellow.question items_blocks 36 96 52 112 none
 ##	 used block
 block.used items_blocks 113 18 129 34 none
 ##	 dirt block
-block.dirt dirt_block 0 0 1200 1200 none
+block.dirt dirt_block 0 0 1199 1199 none
 ##	 question blocks
 block.question.frame1 items_blocks 2 96 17 111 none
 block.question.frame2 items_blocks 19 96 34 111 none

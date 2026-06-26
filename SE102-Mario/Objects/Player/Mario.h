@@ -37,7 +37,7 @@ public:
     static constexpr float MaxRunSpeed = 6.8f;
     static constexpr float RunAcceleration = 3.0f;
     static constexpr float RunDeceleration = 3.0f;
-    static constexpr float JumpHeightMultiplier = 1.5f;
+    static constexpr float JumpHeightMultiplier = 3.25f;
 
     Mario();
     Mario(float x, float y, const Sprite* sprite, int renderWidth = DefaultRenderWidth, int renderHeight = DefaultRenderHeight);
@@ -46,11 +46,13 @@ public:
     void SetRenderSize(int renderWidth, int renderHeight);
     void SetPosition(float newX, float newY);
     void SetOnGround(bool value);
+    void Bounce();
 
     void Update(const Input& input, float deltaTime);
     void ResolveSolidCollisions(const std::vector<RectF>& solidBounds);
     void ResolveVerticalCollision(const std::vector<RectF>& solidBounds);
     void Render(Renderer& renderer) override;
+    void RenderAt(Renderer& renderer, float offsetX, float offsetY);
 
     bool IsOnGround() const;
     FacingDirection GetFacingDirection() const;

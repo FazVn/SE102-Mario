@@ -104,6 +104,14 @@ void Mario::SetOnGround(bool value)
     UpdateState();
 }
 
+void Mario::Bounce()
+{
+    velocityMetersY = -CalculateJumpVelocity(PixelsToMeters(height)) * 0.72f;
+    onGround = false;
+    SyncPixelsFromPhysics();
+    UpdateState();
+}
+
 void Mario::Update(const Input& input, float deltaTime)
 {
     previousPixelX = x;
@@ -298,6 +306,11 @@ void Mario::ResolveVerticalCollision(const std::vector<RectF>& solidBounds)
 
 void Mario::Render(Renderer& renderer)
 {
+    RenderAt(renderer, 0.0f, 0.0f);
+}
+
+void Mario::RenderAt(Renderer& renderer, float offsetX, float offsetY)
+{
     if (!IsVisible() || !sprite || renderWidth <= 0 || renderHeight <= 0)
     {
         return;
@@ -305,7 +318,12 @@ void Mario::Render(Renderer& renderer)
 
     RenderOptions options;
     options.flipX = facingDirection == FacingDirection::Left;
-    renderer.DrawSprite(*sprite, static_cast<int>(std::lround(x)), static_cast<int>(std::lround(y)), renderWidth, renderHeight, options);
+    renderer.DrawSprite(*sprite,
+        static_cast<int>(std::lround(x - offsetX)),
+        static_cast<int>(std::lround(y - offsetY)),
+        renderWidth,
+        renderHeight,
+        options);
 }
 
 bool Mario::IsOnGround() const
