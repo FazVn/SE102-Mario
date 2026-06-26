@@ -58,7 +58,7 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
         sceneManager.RequestChange(SceneId::Play);
     }
 
-    if (input.WasKeyPressed('W'))
+    if (input.WasKeyPressed('H'))
         sceneManager.RequestChange(SceneId::Win);
 
     const float physicsDeltaTime = deltaTime > MaxPhysicsDeltaTime ? MaxPhysicsDeltaTime : deltaTime;

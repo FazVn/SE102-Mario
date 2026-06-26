@@ -1,4 +1,4 @@
-#include "MenuScene.h"
+﻿#include "MenuScene.h"
 
 #include "../Core/Input.h"
 #include "../Core/Renderer.h"
@@ -106,7 +106,7 @@ void MenuScene::Render(Renderer& renderer,
             RGB(180, 180, 180));
     }
 
-    // TIP
+    // HƯỚNG DẪN
     renderer.DrawCenteredText(
         L"UP / DOWN : Select",
         360,

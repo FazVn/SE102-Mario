@@ -1,4 +1,4 @@
-#include "WinScene.h"
+﻿#include "WinScene.h"
 
 #include "../Core/Input.h"
 #include "../Core/Renderer.h"
@@ -115,7 +115,7 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
             RGB(180, 180, 180));
     }
 
-    // TIPS
+    // HƯỚNG DẪN
     renderer.DrawCenteredText(
         L"UP / DOWN : Select",
         360,
