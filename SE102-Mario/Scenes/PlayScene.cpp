@@ -482,7 +482,7 @@ bool PlayScene::LoadLevelFromFile(const std::wstring& resourceRelativePath)
                 AddStaircase(x, y, steps, command == "STAIR_RIGHT" ? 1 : -1);
             }
         }
-        else if (command == "GOOMBA" || command == "KOOPA")
+        else if (command == "GOOMBA" || command == "KOOPA" || command == "RED_KOOPA")
         {
             float x = 0.0f;
             float y = 0.0f;
@@ -646,13 +646,15 @@ void PlayScene::AddStaircase(float x, float y, int steps, int direction)
 
 void PlayScene::AddEnemy(const std::string& enemyType, float x, float y)
 {
-    if (enemyType == "KOOPA")
+    if (enemyType == "KOOPA" || enemyType == "RED_KOOPA")
     {
+        const std::string koopaColor = enemyType == "RED_KOOPA" ? "red" : "green";
         enemies.push_back(std::make_unique<Koopa>(
             x,
             y,
-            spriteManager.Get("enemy.koopa.green.walk1"),
-            spriteManager.Get("enemy.koopa.green.walk2")));
+            spriteManager.Get("enemy.koopa." + koopaColor + ".walk1"),
+            spriteManager.Get("enemy.koopa." + koopaColor + ".walk2"),
+            enemyType == "RED_KOOPA"));
     }
     else
     {

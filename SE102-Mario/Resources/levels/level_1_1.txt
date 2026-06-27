@@ -71,6 +71,7 @@ BRICK 4672 288
 BRICK 4704 288
 BRICK 4736 288
 GOOMBA 4928 384
+RED_KOOPA 5120 368
 STAIR_RIGHT 5376 384 8
 
 # Flag and castle. The narrow used block is a temporary flagpole stand-in.

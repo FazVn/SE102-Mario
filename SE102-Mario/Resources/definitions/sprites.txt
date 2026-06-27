@@ -79,6 +79,10 @@ enemy.goomba.squashed enemies 35 45 50 60 auto
 enemy.koopa.green.walk1 enemies 52 37 67 60 auto # frame 1 of walking animation (right facing)
 enemy.koopa.green.walk2 enemies 69 37 84 60 auto # frame 2 of walking animation (right facing)
 enemy.koopa.green.shell enemies 120 45 135 60 auto # koopa shell
+## red koopa (turn around when they reach ledges or corners) (walking animation: walk1 -> walk2 -> walk1 -> walk2 -> ....)
+enemy.koopa.red.walk1 enemies 1 6 16 29 auto # frame 1 of walking animation (right facing)
+enemy.koopa.red.walk2 enemies 18 6 33 29 auto # frame 2 of walking animation (right facing)
+enemy.koopa.red.shell enemies 69 14 84 29 auto # koopa shell
 #	 blocks
 ##	 brick blocks
 block.gold.tanborder.brick items_blocks 36 113 52 129 none
