@@ -31,8 +31,6 @@ namespace
 {
     constexpr int TileSize = 32;
     constexpr float MaxPhysicsDeltaTime = 0.05f;
-    constexpr float MarioRenderWidth = 32.0f;
-    constexpr float MarioRenderHeight = 48.0f;
     constexpr int InitialTime = 400;
     constexpr int MaximumScore = 999999;
     constexpr int CoinScore = 200;
@@ -40,6 +38,11 @@ namespace
     constexpr int PowerUpScore = 1000;
     constexpr float EnemyActivationMargin = 96.0f;
     constexpr float ShellKickSeparation = 2.0f;
+    constexpr float FireballSize = 20.0f;
+    constexpr float FireballSpeed = 320.0f;
+    constexpr float FireballLifeTime = 2.5f;
+    constexpr float FireballFrameDuration = 0.08f;
+    constexpr size_t MaximumFireballs = 2;
 
     RectF MakeRect(float x, float y, float width, float height)
     {
@@ -215,6 +218,13 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
         mario.SetPosition(levelWidth - mario.GetWidth(), mario.GetY());
     }
 
+    if (input.WasKeyPressed(VK_UP))
+    {
+        SpawnFireball();
+    }
+
+    UpdateFireballs(physicsDeltaTime);
+
     if (UpdateEnemies(physicsDeltaTime))
     {
         sceneManager.RequestChange(SceneId::GameOver);
@@ -301,6 +311,7 @@ void PlayScene::Render(Renderer& renderer, HWND windowHandle)
         enemy->RenderAt(renderer, camera.GetX(), camera.GetY());
     }
 
+    RenderFireballs(renderer);
 
     mario.RenderAt(renderer, camera.GetX(), camera.GetY());
 
@@ -517,9 +528,9 @@ bool PlayScene::LoadLevelFromFile(const std::wstring& resourceRelativePath)
     levelWidth = levelWidth > static_cast<float>(GameConfig::WindowWidth) ? levelWidth : static_cast<float>(GameConfig::WindowWidth);
     levelHeight = levelHeight > static_cast<float>(GameConfig::WindowHeight) ? levelHeight : static_cast<float>(GameConfig::WindowHeight);
 
-    mario.SetSprite(spriteManager.Get("mario.super.stand"));
-    mario.SetRenderSize(static_cast<int>(MarioRenderWidth), static_cast<int>(MarioRenderHeight));
-    mario.SetPosition(spawnX, spawnY);
+    mario.ResetPowerState();
+    mario.SetSprite(spriteManager.Get("mario.small.stand"));
+    mario.SetPosition(spawnX, spawnY + static_cast<float>(Mario::PoweredRenderHeight) - mario.GetHeight());
     mario.SetOnGround(true);
     UpdateCamera();
     UpdateMarioSprite(0.0f);
@@ -538,9 +549,9 @@ void PlayScene::BuildFallbackLevel()
     AddTiledSprite("block.dirt", 0.0f, 416.0f, static_cast<float>(GameConfig::WindowWidth), 64.0f, TileSize, TileSize, true);
     AddTiledSprite("block.dirt", 320.0f, 384.0f, 160.0f, 32.0f, TileSize, TileSize, true);
 
-    mario.SetSprite(spriteManager.Get("mario.super.stand"));
-    mario.SetRenderSize(static_cast<int>(MarioRenderWidth), static_cast<int>(MarioRenderHeight));
-    mario.SetPosition(spawnX, spawnY);
+    mario.ResetPowerState();
+    mario.SetSprite(spriteManager.Get("mario.small.stand"));
+    mario.SetPosition(spawnX, spawnY + static_cast<float>(Mario::PoweredRenderHeight) - mario.GetHeight());
     mario.SetOnGround(true);
     UpdateCamera();
 }
@@ -555,6 +566,7 @@ void PlayScene::ClearLevel()
     mushrooms.clear();
     stars.clear();
     enemies.clear();
+    fireballs.clear();
     solidBounds.clear();
     winBounds = RectF{};
     levelWidth = static_cast<float>(GameConfig::WindowWidth);
@@ -856,7 +868,10 @@ bool PlayScene::UpdateEnemies(float deltaTime)
             }
             else
             {
-                hitMario = true;
+                if (mario.TakeHit())
+                {
+                    hitMario = true;
+                }
             }
         }
     }
@@ -929,7 +944,7 @@ void PlayScene::UpdateItems(float deltaTime)
         if (marioBounds.Intersects(mushroom->GetBoundingBox()))
         {
             mushroom->SetActive(false);
-            mario.SetRenderSize(static_cast<int>(MarioRenderWidth), static_cast<int>(MarioRenderHeight));
+            mario.UpgradeWithMushroom();
             AddScore(PowerUpScore);
         }
     }
@@ -963,6 +978,105 @@ void PlayScene::UpdateItems(float deltaTime)
         stars.end());
 }
 
+void PlayScene::SpawnFireball()
+{
+    if (!mario.CanShootFireball() || fireballs.size() >= MaximumFireballs)
+    {
+        return;
+    }
+
+    const bool shootsRight = mario.GetFacingDirection() == Mario::FacingDirection::Right;
+    const float fireballX = shootsRight
+        ? mario.GetX() + mario.GetWidth()
+        : mario.GetX() - FireballSize;
+    const float fireballY = mario.GetY() + mario.GetHeight() * 0.42f;
+
+    fireballs.push_back(FireballInstance{
+        fireballX,
+        fireballY,
+        shootsRight ? FireballSpeed : -FireballSpeed
+        });
+    mario.StartShootAnimation();
+}
+
+void PlayScene::UpdateFireballs(float deltaTime)
+{
+    for (FireballInstance& fireball : fireballs)
+    {
+        if (!fireball.active)
+        {
+            continue;
+        }
+
+        fireball.animationTime += deltaTime;
+        fireball.lifeTime += deltaTime;
+        fireball.x += fireball.velocityX * deltaTime;
+
+        const RectF fireballBounds = MakeRect(fireball.x, fireball.y, FireballSize, FireballSize);
+        if (fireball.lifeTime >= FireballLifeTime ||
+            fireballBounds.right < 0.0f || fireballBounds.left > levelWidth)
+        {
+            fireball.active = false;
+            continue;
+        }
+
+        for (const RectF& solid : solidBounds)
+        {
+            if (fireballBounds.Intersects(solid))
+            {
+                fireball.active = false;
+                break;
+            }
+        }
+
+        if (!fireball.active)
+        {
+            continue;
+        }
+
+        for (const auto& enemy : enemies)
+        {
+            if (enemy && enemy->IsActive() && fireballBounds.Intersects(enemy->GetBoundingBox()))
+            {
+                OnEnemyDefeated(*enemy);
+                fireball.active = false;
+                break;
+            }
+        }
+    }
+
+    fireballs.erase(std::remove_if(fireballs.begin(), fireballs.end(),
+        [](const FireballInstance& fireball) { return !fireball.active; }),
+        fireballs.end());
+}
+
+void PlayScene::RenderFireballs(Renderer& renderer)
+{
+    for (const FireballInstance& fireball : fireballs)
+    {
+        if (!fireball.active || !IsVisibleInCamera(fireball.x, FireballSize))
+        {
+            continue;
+        }
+
+        const int frame = static_cast<int>(fireball.animationTime / FireballFrameDuration) % 3 + 1;
+        const Sprite* sprite = spriteManager.Get("fireball.frame" + std::to_string(frame));
+        if (!sprite)
+        {
+            continue;
+        }
+
+        RenderOptions options;
+        options.rotationDegrees = fireball.velocityX > 0.0f ? 90.0f : -90.0f;
+        renderer.DrawSprite(*sprite,
+            static_cast<int>(std::lround(fireball.x - camera.GetX())),
+            static_cast<int>(std::lround(fireball.y - camera.GetY())),
+            static_cast<int>(FireballSize),
+            static_cast<int>(FireballSize),
+            options);
+    }
+}
+
 bool PlayScene::UpdateTimer(float deltaTime)
 {
     if (timeLeft <= 0)
@@ -988,25 +1102,72 @@ void PlayScene::UpdateMarioSprite(float deltaTime)
 {
     marioAnimationTime += deltaTime;
 
-    std::string spriteId = "mario.super.stand";
-    if (mario.GetState() == Mario::State::Jump || mario.GetState() == Mario::State::Fall)
+    if (mario.IsTransforming())
     {
-        spriteId = "mario.super.jump";
+        const Mario::Transformation transformation = mario.GetTransformation();
+        int frameCount = 1;
+        std::string spritePrefix;
+        bool reverseFrames = false;
+
+        if (transformation == Mario::Transformation::SmallToSuper)
+        {
+            frameCount = 3;
+            spritePrefix = "mario.small_to_super.frame";
+        }
+        else if (transformation == Mario::Transformation::SuperToFire ||
+            transformation == Mario::Transformation::FireToSuper)
+        {
+            frameCount = 4;
+            spritePrefix = "mario.super_to_fire.stand.frame";
+            reverseFrames = transformation == Mario::Transformation::FireToSuper;
+        }
+        else if (transformation == Mario::Transformation::SuperToSmall)
+        {
+            frameCount = 5;
+            spritePrefix = "mario.super_to_small.frame";
+        }
+
+        const int forwardFrame = std::min(
+            static_cast<int>(mario.GetTransformationProgress() * static_cast<float>(frameCount)),
+            frameCount - 1) + 1;
+        const int frame = reverseFrames ? frameCount - forwardFrame + 1 : forwardFrame;
+        mario.SetSprite(spriteManager.Get(spritePrefix + std::to_string(frame)));
+        return;
+    }
+
+    std::string formPrefix = "mario.small";
+    if (mario.GetPowerForm() == Mario::Form::Super)
+    {
+        formPrefix = "mario.super";
+    }
+    else if (mario.GetPowerForm() == Mario::Form::Fire)
+    {
+        formPrefix = "mario.fire";
+    }
+
+    std::string spriteId = formPrefix + ".stand";
+    if (mario.GetPowerForm() == Mario::Form::Fire && mario.IsShooting())
+    {
+        spriteId = "mario.fire.shoot";
+    }
+    else if (mario.GetState() == Mario::State::Jump || mario.GetState() == Mario::State::Fall)
+    {
+        spriteId = formPrefix + ".jump";
     }
     else if (mario.GetState() == Mario::State::Walk)
     {
         const int frame = static_cast<int>(marioAnimationTime / 0.08f) % 3;
         if (frame == 0)
         {
-            spriteId = "mario.super.walk1";
+            spriteId = formPrefix + ".walk1";
         }
         else if (frame == 1)
         {
-            spriteId = "mario.super.walk2";
+            spriteId = formPrefix + ".walk2";
         }
         else
         {
-            spriteId = "mario.super.walk3";
+            spriteId = formPrefix + ".walk3";
         }
     }
 

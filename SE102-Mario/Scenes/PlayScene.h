@@ -63,6 +63,16 @@ private:
         int tileHeight = 32;
     };
 
+    struct FireballInstance
+    {
+        float x = 0.0f;
+        float y = 0.0f;
+        float velocityX = 0.0f;
+        float animationTime = 0.0f;
+        float lifeTime = 0.0f;
+        bool active = true;
+    };
+
     bool LoadLevelFromFile(const std::wstring& resourceRelativePath);
     void BuildFallbackLevel();
     void ClearLevel();
@@ -80,6 +90,9 @@ private:
     void UpdateQuestionBlocks(float deltaTime);
     bool UpdateEnemies(float deltaTime);
     void UpdateItems(float deltaTime);
+    void SpawnFireball();
+    void UpdateFireballs(float deltaTime);
+    void RenderFireballs(Renderer& renderer);
     bool UpdateTimer(float deltaTime);
     void UpdateMarioSprite(float deltaTime);
     void RenderSpriteInstance(Renderer& renderer, const SpriteInstance& instance);
@@ -100,6 +113,7 @@ private:
     std::vector<std::unique_ptr<Mushroom>> mushrooms;
     std::vector<std::unique_ptr<Star>> stars;
     std::vector<std::unique_ptr<Enemy>> enemies;
+    std::vector<FireballInstance> fireballs;
     std::vector<RectF> solidBounds;
 
     RectF winBounds{};

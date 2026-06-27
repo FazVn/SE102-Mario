@@ -106,10 +106,79 @@ void Mario::SetOnGround(bool value)
 
 void Mario::Bounce()
 {
-    velocityMetersY = -CalculateJumpVelocity(PixelsToMeters(height)) * 0.72f;
+    velocityMetersY = -CalculateJumpVelocity(PixelsToMeters(PoweredRenderHeight)) * 0.72f;
     onGround = false;
     SyncPixelsFromPhysics();
     UpdateState();
+}
+
+void Mario::ResetPowerState()
+{
+    form = Form::Small;
+    transformation = Transformation::None;
+    transformationTimer = 0.0f;
+    damageInvulnerabilityTimer = 0.0f;
+    shootAnimationTimer = 0.0f;
+    starPowerTimer = 0.0f;
+    SetRenderSize(SmallRenderWidth, SmallRenderHeight);
+}
+
+void Mario::UpgradeWithMushroom()
+{
+    if (transformation != Transformation::None)
+    {
+        return;
+    }
+
+    if (form == Form::Small)
+    {
+        ApplyForm(Form::Super);
+        StartTransformation(Transformation::SmallToSuper);
+    }
+    else if (form == Form::Super)
+    {
+        ApplyForm(Form::Fire);
+        StartTransformation(Transformation::SuperToFire);
+    }
+}
+
+bool Mario::TakeHit()
+{
+    if (IsInvincible() || IsDamageImmune())
+    {
+        return false;
+    }
+
+    if (form == Form::Fire)
+    {
+        ApplyForm(Form::Super);
+        StartTransformation(Transformation::FireToSuper);
+        damageInvulnerabilityTimer = DamageInvulnerabilityDuration;
+        return false;
+    }
+
+    if (form == Form::Super)
+    {
+        ApplyForm(Form::Small);
+        StartTransformation(Transformation::SuperToSmall);
+        damageInvulnerabilityTimer = DamageInvulnerabilityDuration;
+        return false;
+    }
+
+    return true;
+}
+
+bool Mario::CanShootFireball() const
+{
+    return form == Form::Fire && transformation == Transformation::None;
+}
+
+void Mario::StartShootAnimation()
+{
+    if (CanShootFireball())
+    {
+        shootAnimationTimer = ShootAnimationDuration;
+    }
 }
 
 void Mario::Update(const Input& input, float deltaTime)
@@ -123,6 +192,34 @@ void Mario::Update(const Input& input, float deltaTime)
         if (starPowerTimer < 0.0f)
         {
             starPowerTimer = 0.0f;
+        }
+    }
+
+    if (transformation != Transformation::None)
+    {
+        transformationTimer += deltaTime;
+        if (transformationTimer >= TransformationDuration)
+        {
+            transformation = Transformation::None;
+            transformationTimer = 0.0f;
+        }
+    }
+
+    if (damageInvulnerabilityTimer > 0.0f)
+    {
+        damageInvulnerabilityTimer -= deltaTime;
+        if (damageInvulnerabilityTimer < 0.0f)
+        {
+            damageInvulnerabilityTimer = 0.0f;
+        }
+    }
+
+    if (shootAnimationTimer > 0.0f)
+    {
+        shootAnimationTimer -= deltaTime;
+        if (shootAnimationTimer < 0.0f)
+        {
+            shootAnimationTimer = 0.0f;
         }
     }
 
@@ -170,7 +267,7 @@ void Mario::Update(const Input& input, float deltaTime)
 
     if (input.WasKeyPressed(VK_SPACE) && onGround)
     {
-        velocityMetersY = -CalculateJumpVelocity(PixelsToMeters(height));
+        velocityMetersY = -CalculateJumpVelocity(PixelsToMeters(PoweredRenderHeight));
         onGround = false;
     }
 
@@ -350,6 +447,21 @@ bool Mario::IsInvincible() const
     return starPowerTimer > 0.0f;
 }
 
+bool Mario::IsDamageImmune() const
+{
+    return damageInvulnerabilityTimer > 0.0f || transformation != Transformation::None;
+}
+
+bool Mario::IsShooting() const
+{
+    return shootAnimationTimer > 0.0f;
+}
+
+bool Mario::IsTransforming() const
+{
+    return transformation != Transformation::None;
+}
+
 RectF Mario::GetPreviousBoundingBox() const
 {
     return RectF{ previousPixelX, previousPixelY, previousPixelX + width, previousPixelY + height };
@@ -365,9 +477,53 @@ Mario::State Mario::GetState() const
     return state;
 }
 
+Mario::Form Mario::GetPowerForm() const
+{
+    return form;
+}
+
+Mario::Transformation Mario::GetTransformation() const
+{
+    return transformation;
+}
+
+float Mario::GetTransformationProgress() const
+{
+    if (transformation == Transformation::None)
+    {
+        return 1.0f;
+    }
+
+    return std::clamp(transformationTimer / TransformationDuration, 0.0f, 1.0f);
+}
+
 void Mario::ActivateStarPower()
 {
     starPowerTimer = StarPowerDuration;
+}
+
+void Mario::ApplyForm(Form newForm)
+{
+    const float previousBottom = y + height;
+    form = newForm;
+
+    if (form == Form::Small)
+    {
+        SetRenderSize(SmallRenderWidth, SmallRenderHeight);
+    }
+    else
+    {
+        SetRenderSize(PoweredRenderWidth, PoweredRenderHeight);
+    }
+
+    SetPosition(x, previousBottom - height);
+}
+
+void Mario::StartTransformation(Transformation newTransformation)
+{
+    transformation = newTransformation;
+    transformationTimer = 0.0f;
+    shootAnimationTimer = 0.0f;
 }
 
 void Mario::SyncPixelsFromPhysics()

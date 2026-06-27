@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <gdiplus.h>
 
 #pragma comment(lib, "Msimg32.lib")
 
@@ -28,6 +29,69 @@ namespace
     RECT MakeSourceRect(int xLeft, int yTop, int xRight, int yDown)
     {
         return RECT{ xLeft, yTop, xRight, yDown };
+    }
+
+    void DrawRotatedTexture(HDC targetContext,
+        const Texture& texture,
+        int x,
+        int y,
+        int destinationWidth,
+        int destinationHeight,
+        const RECT& sourceRect,
+        bool useTransparentColor,
+        COLORREF transparentColor,
+        const RenderOptions& options)
+    {
+        Gdiplus::Bitmap bitmap(texture.GetHandle(), nullptr);
+        if (bitmap.GetLastStatus() != Gdiplus::Ok)
+        {
+            return;
+        }
+
+        Gdiplus::ImageAttributes attributes;
+        if (useTransparentColor)
+        {
+            const Gdiplus::Color colorKey(
+                GetRValue(transparentColor),
+                GetGValue(transparentColor),
+                GetBValue(transparentColor));
+            attributes.SetColorKey(colorKey, colorKey);
+        }
+
+        const float alpha = std::clamp(options.alpha, 0.0f, 1.0f);
+        Gdiplus::ColorMatrix alphaMatrix = {
+            1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, alpha, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+        };
+        attributes.SetColorMatrix(&alphaMatrix);
+
+        Gdiplus::Graphics graphics(targetContext);
+        graphics.SetInterpolationMode(Gdiplus::InterpolationModeNearestNeighbor);
+        graphics.SetPixelOffsetMode(Gdiplus::PixelOffsetModeHalf);
+
+        const float centerX = static_cast<float>(x) + static_cast<float>(destinationWidth) * 0.5f;
+        const float centerY = static_cast<float>(y) + static_cast<float>(destinationHeight) * 0.5f;
+        const Gdiplus::GraphicsState state = graphics.Save();
+        graphics.TranslateTransform(centerX, centerY);
+        graphics.RotateTransform(options.rotationDegrees);
+        graphics.ScaleTransform(options.flipX ? -1.0f : 1.0f, options.flipY ? -1.0f : 1.0f);
+        graphics.TranslateTransform(-centerX, -centerY);
+
+        const int sourceWidth = sourceRect.right - sourceRect.left;
+        const int sourceHeight = sourceRect.bottom - sourceRect.top;
+        const Gdiplus::Rect destinationRect(x, y, destinationWidth, destinationHeight);
+        graphics.DrawImage(&bitmap,
+            destinationRect,
+            sourceRect.left,
+            sourceRect.top,
+            sourceWidth,
+            sourceHeight,
+            Gdiplus::UnitPixel,
+            &attributes);
+        graphics.Restore(state);
     }
 }
 
@@ -92,6 +156,21 @@ void Renderer::DrawTexture(const Texture& texture, int x, int y, int destination
 
     if (destinationWidth <= 0 || destinationHeight <= 0)
     {
+        return;
+    }
+
+    if (std::abs(options.rotationDegrees) > 0.01f)
+    {
+        DrawRotatedTexture(backBufferContext,
+            texture,
+            x,
+            y,
+            destinationWidth,
+            destinationHeight,
+            sourceRect,
+            useTransparentColor,
+            transparentColor,
+            options);
         return;
     }
 

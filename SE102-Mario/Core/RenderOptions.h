@@ -6,4 +6,5 @@ struct RenderOptions
     bool flipY = false;
     float alpha = 1.0f;
     float scale = 1.0f;
+    float rotationDegrees = 0.0f;
 };
