@@ -25,22 +25,19 @@ void PauseScene::Update(SceneManager& sceneManager, const Input& input, float)
     {
         if (selected == 0)
         {
-            // Tiếp tục chơi
             sceneManager.RequestChange(SceneId::Play);
         }
         else if (selected == 1)
         {
-            // Về menu
             sceneManager.RequestChange(SceneId::Menu);
         }
         else
         {
-            // Thoát
+           
             PostQuitMessage(0);
         }
     }
 
-    // Nhấn ESC cũng resume
     if (input.WasKeyPressed(VK_ESCAPE))
     {
         sceneManager.RequestChange(SceneId::Play);
@@ -51,7 +48,6 @@ void PauseScene::Render(Renderer& renderer, HWND windowHandle)
 {
     renderer.Begin(windowHandle, RGB(20, 20, 40));
 
-    // TITLE
     renderer.DrawCenteredText(
         L"PAUSED",
         60,
@@ -59,9 +55,7 @@ void PauseScene::Render(Renderer& renderer, HWND windowHandle)
         42,
         RGB(255, 255, 255));
 
-    //-----------------------------------
-    // RESUME
-    //-----------------------------------
+
     if (selected == 0)
     {
         renderer.DrawCenteredText(
@@ -81,9 +75,7 @@ void PauseScene::Render(Renderer& renderer, HWND windowHandle)
             RGB(180, 180, 180));
     }
 
-    //-----------------------------------
-    // RETURN TO MENU
-    //-----------------------------------
+
     if (selected == 1)
     {
         renderer.DrawCenteredText(
@@ -103,9 +95,7 @@ void PauseScene::Render(Renderer& renderer, HWND windowHandle)
             RGB(180, 180, 180));
     }
 
-    //-----------------------------------
-    // EXIT
-    //-----------------------------------
+
     if (selected == 2)
     {
         renderer.DrawCenteredText(
@@ -125,7 +115,7 @@ void PauseScene::Render(Renderer& renderer, HWND windowHandle)
             RGB(180, 180, 180));
     }
 
-    // HƯỚNG DẪN
+
     renderer.DrawCenteredText(
         L"UP / DOWN : Select",
         360,

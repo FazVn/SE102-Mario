@@ -59,7 +59,6 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
 {
     renderer.Begin(windowHandle, RGB(36, 56, 88));
 
-    // TITLE
     renderer.DrawCenteredText(
         L"YOU WIN!",
         60,
@@ -74,9 +73,7 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
         28,
         RGB(255, 255, 255));
 
-    //-----------------------------------
-    // NEXT LEVEL / RESTART
-    //-----------------------------------
+
     if (selected == 0)
     {
         renderer.DrawCenteredText(
@@ -96,9 +93,7 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
             RGB(180, 180, 180));
     }
 
-    //-----------------------------------
-    // RETURN TO MENU
-    //-----------------------------------
+
     if (selected == 1)
     {
         renderer.DrawCenteredText(
@@ -118,9 +113,7 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
             RGB(180, 180, 180));
     }
 
-    //-----------------------------------
-    // EXIT
-    //-----------------------------------
+
     if (selected == 2)
     {
         renderer.DrawCenteredText(
@@ -140,7 +133,6 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
             RGB(180, 180, 180));
     }
 
-    // HƯỚNG DẪN
     renderer.DrawCenteredText(
         L"UP / DOWN : Select",
         360,

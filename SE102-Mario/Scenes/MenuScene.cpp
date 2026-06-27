@@ -54,7 +54,6 @@ void MenuScene::Render(Renderer& renderer,
 {
     renderer.Begin(windowHandle, RGB(36, 56, 88));
 
-    // TITLE
     renderer.DrawCenteredText(
         L"MARIO GAME",
         60,
@@ -62,9 +61,7 @@ void MenuScene::Render(Renderer& renderer,
         40,
         RGB(255, 230, 80));
 
-    //-----------------------------------
-    // PLAY
-    //-----------------------------------
+
     if (selected == 0)
     {
         renderer.DrawCenteredText(
@@ -84,9 +81,6 @@ void MenuScene::Render(Renderer& renderer,
             RGB(180, 180, 180));
     }
 
-    //-----------------------------------
-    // EXIT
-    //-----------------------------------
     if (selected == 1)
     {
         renderer.DrawCenteredText(
@@ -106,7 +100,6 @@ void MenuScene::Render(Renderer& renderer,
             RGB(180, 180, 180));
     }
 
-    // HƯỚNG DẪN
     renderer.DrawCenteredText(
         L"UP / DOWN : Select",
         360,
