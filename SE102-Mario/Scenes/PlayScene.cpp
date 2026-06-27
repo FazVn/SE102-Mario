@@ -14,6 +14,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -32,6 +33,12 @@ namespace
     constexpr float MaxPhysicsDeltaTime = 0.05f;
     constexpr float MarioRenderWidth = 32.0f;
     constexpr float MarioRenderHeight = 48.0f;
+    constexpr int InitialTime = 400;
+    constexpr int MaximumScore = 999999;
+    constexpr int CoinScore = 200;
+    constexpr int EnemyScore = 100;
+    constexpr int PowerUpScore = 1000;
+    constexpr float EnemyActivationMargin = 96.0f;
 
     RectF MakeRect(float x, float y, float width, float height)
     {
@@ -79,6 +86,13 @@ namespace
     {
         return first.left < second.right && first.right > second.left;
     }
+
+    std::wstring FormatScore(int score)
+    {
+        std::wostringstream stream;
+        stream << std::setfill(L'0') << std::setw(6) << score;
+        return stream.str();
+    }
 }
 
 PlayScene::PlayScene(TextureManager& textures)
@@ -88,6 +102,13 @@ PlayScene::PlayScene(TextureManager& textures)
 
 void PlayScene::Load()
 {
+    score = 0;
+    coinCount = 0;
+    timeLeft = InitialTime;
+    timeAccumulator = 0.0f;
+    isPaused = false;
+    selectedPause = 0;
+
     assetsLoaded = spriteManager.LoadFromDefinitionFile(L"definitions/sprites.txt", textureManager);
 
     if (fontManager.Load("mario", L"fonts/SS-Mario-Regular.otf", L"SS Mario"))
@@ -172,6 +193,12 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
         return; 
     }
 
+    if (UpdateTimer(deltaTime))
+    {
+        sceneManager.RequestChange(SceneId::GameOver);
+        return;
+    }
+
     const float physicsDeltaTime = deltaTime > MaxPhysicsDeltaTime ? MaxPhysicsDeltaTime : deltaTime;
     mario.Update(input, physicsDeltaTime);
     UpdateQuestionBlocks(physicsDeltaTime);
@@ -203,6 +230,7 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
 
     if (winBounds.Width() > 0.0f && winBounds.Height() > 0.0f && mario.GetBoundingBox().Intersects(winBounds))
     {
+        AwardTimeBonus();
         sceneManager.RequestChange(SceneId::Win);
         return;
     }
@@ -275,8 +303,10 @@ void PlayScene::Render(Renderer& renderer, HWND windowHandle)
 
     mario.RenderAt(renderer, camera.GetX(), camera.GetY());
 
-    renderer.DrawTextLine(L"WORLD 1-1", 24, 14, 20, RGB(255, 255, 255), marioFontFamily.c_str(), FW_BOLD);
-    renderer.DrawTextLine(L"COIN " + std::to_wstring(coinsCollected), 300, 14, 20, RGB(255, 255, 255), marioFontFamily.c_str(), FW_BOLD);
+    renderer.DrawTextLine(FormatScore(score), 24, 14, 20, RGB(255, 255, 255), marioFontFamily.c_str(), FW_BOLD);
+    renderer.DrawTextLine(L"COIN " + std::to_wstring(coinCount), 210, 14, 20, RGB(255, 255, 255), marioFontFamily.c_str(), FW_BOLD);
+    renderer.DrawTextLine(L"WORLD 1-1", 400, 14, 20, RGB(255, 255, 255), marioFontFamily.c_str(), FW_BOLD);
+    renderer.DrawTextLine(L"TIME " + std::to_wstring(timeLeft), 680, 14, 20, RGB(255, 255, 255), marioFontFamily.c_str(), FW_BOLD);
 
     if (isPaused)
     {
@@ -531,7 +561,6 @@ void PlayScene::ClearLevel()
     spawnX = 96.0f;
     spawnY = 368.0f;
     marioAnimationTime = 0.0f;
-    coinsCollected = 0;
     camera.Follow(0.0f, 0.0f);
 }
 
@@ -689,9 +718,62 @@ void PlayScene::SpawnQuestionBlockContent(const QuestionBlock& block)
             spriteManager.Get("item.coin.frame3"),
             spriteManager.Get("item.coin.frame4"),
             true));
-        ++coinsCollected;
+        AddCoin();
         break;
     }
+}
+
+void PlayScene::AddScore(int amount)
+{
+    if (amount <= 0 || score >= MaximumScore)
+    {
+        return;
+    }
+
+    score = amount > MaximumScore - score ? MaximumScore : score + amount;
+}
+
+void PlayScene::AddCoin()
+{
+    ++coinCount;
+    AddScore(CoinScore);
+}
+
+void PlayScene::OnEnemyDefeated(Enemy& enemy)
+{
+    if (!enemy.IsActive())
+    {
+        return;
+    }
+
+    enemy.Defeat();
+    AddScore(EnemyScore);
+}
+
+void PlayScene::AwardTimeBonus()
+{
+    int bonus = 0;
+    for (int second = timeLeft; second > 0; --second)
+    {
+        if (second >= 350)
+        {
+            bonus += 250;
+        }
+        else if (second >= 300)
+        {
+            bonus += 80;
+        }
+        else if (second >= 200)
+        {
+            bonus += 20;
+        }
+        else
+        {
+            bonus += 5;
+        }
+    }
+
+    AddScore(bonus);
 }
 
 void PlayScene::UpdateCamera()
@@ -714,6 +796,13 @@ bool PlayScene::UpdateEnemies(float deltaTime)
             continue;
         }
 
+        const float activationRight = camera.GetX() +
+            static_cast<float>(GameConfig::WindowWidth) + EnemyActivationMargin;
+        if (enemy->GetX() > activationRight)
+        {
+            continue;
+        }
+
         enemy->Update(deltaTime, solidBounds, levelHeight);
 
         const RectF enemyBounds = enemy->GetBoundingBox();
@@ -722,14 +811,14 @@ bool PlayScene::UpdateEnemies(float deltaTime)
         {
             if (mario.IsInvincible())
             {
-                enemy->Defeat();
+                OnEnemyDefeated(*enemy);
                 continue;
             }
 
             const bool stomped = mario.GetVelocityY() > 0.0f && marioBounds.bottom <= enemyBounds.top + 16.0f;
             if (stomped)
             {
-                enemy->Defeat();
+                OnEnemyDefeated(*enemy);
                 mario.Bounce();
             }
             else
@@ -792,7 +881,7 @@ void PlayScene::UpdateItems(float deltaTime)
         if (coin->IsCollidable() && marioBounds.Intersects(coin->GetBoundingBox()))
         {
             coin->SetActive(false);
-            ++coinsCollected;
+            AddCoin();
         }
     }
 
@@ -808,6 +897,7 @@ void PlayScene::UpdateItems(float deltaTime)
         {
             mushroom->SetActive(false);
             mario.SetRenderSize(static_cast<int>(MarioRenderWidth), static_cast<int>(MarioRenderHeight));
+            AddScore(PowerUpScore);
         }
     }
 
@@ -823,6 +913,7 @@ void PlayScene::UpdateItems(float deltaTime)
         {
             star->SetActive(false);
             mario.ActivateStarPower();
+            AddScore(PowerUpScore);
         }
     }
 
@@ -837,6 +928,27 @@ void PlayScene::UpdateItems(float deltaTime)
     stars.erase(std::remove_if(stars.begin(), stars.end(),
         [](const std::unique_ptr<Star>& star) { return !star || !star->IsActive(); }),
         stars.end());
+}
+
+bool PlayScene::UpdateTimer(float deltaTime)
+{
+    if (timeLeft <= 0)
+    {
+        return true;
+    }
+
+    if (deltaTime > 0.0f)
+    {
+        timeAccumulator += deltaTime;
+    }
+
+    while (timeAccumulator >= 1.0f && timeLeft > 0)
+    {
+        timeAccumulator -= 1.0f;
+        --timeLeft;
+    }
+
+    return timeLeft <= 0;
 }
 
 void PlayScene::UpdateMarioSprite(float deltaTime)

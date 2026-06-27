@@ -35,6 +35,11 @@ public:
     void Render(Renderer& renderer,
         HWND windowHandle) override;
 
+    void AddScore(int amount);
+    void AddCoin();
+    void OnEnemyDefeated(Enemy& enemy);
+    void AwardTimeBonus();
+
 private:
     struct SpriteInstance
     {
@@ -73,6 +78,7 @@ private:
     void UpdateQuestionBlocks(float deltaTime);
     bool UpdateEnemies(float deltaTime);
     void UpdateItems(float deltaTime);
+    bool UpdateTimer(float deltaTime);
     void UpdateMarioSprite(float deltaTime);
     void RenderSpriteInstance(Renderer& renderer, const SpriteInstance& instance);
     void RenderTiledSpriteInstance(Renderer& renderer, const TiledSpriteInstance& instance);
@@ -100,7 +106,10 @@ private:
     float spawnX = 96.0f;
     float spawnY = 368.0f;
     float marioAnimationTime = 0.0f;
-    int coinsCollected = 0;
+    int score = 0;
+    int coinCount = 0;
+    int timeLeft = 400;
+    float timeAccumulator = 0.0f;
     bool assetsLoaded = false;
     std::wstring marioFontFamily;
     float lastDeltaTime = 0.0f;

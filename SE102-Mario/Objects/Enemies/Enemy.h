@@ -10,7 +10,7 @@ class Sprite;
 class Enemy : public GameObject
 {
 public:
-    Enemy(float x, float y, float width, float height, float velocityX, const Sprite* walkFrame1, const Sprite* walkFrame2);
+    Enemy(float x, float y, float width, float height, float velocityX, const Sprite* walkFrame1, const Sprite* walkFrame2, bool walkFramesFaceRight = false);
 
     void Update(float deltaTime, const std::vector<RectF>& solidBounds, float levelHeight);
     void RenderAt(Renderer& renderer, float offsetX, float offsetY);
@@ -21,5 +21,6 @@ private:
 
     const Sprite* walkFrame1 = nullptr;
     const Sprite* walkFrame2 = nullptr;
+    bool walkFramesFaceRight = false;
     float animationTime = 0.0f;
 };

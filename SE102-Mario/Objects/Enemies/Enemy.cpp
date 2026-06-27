@@ -1,5 +1,6 @@
 #include "Enemy.h"
 
+#include "../../Core/RenderOptions.h"
 #include "../../Core/Renderer.h"
 #include "../../Core/Sprite.h"
 
@@ -16,10 +17,11 @@ namespace
     }
 }
 
-Enemy::Enemy(float x, float y, float width, float height, float velocityX, const Sprite* walkFrame1, const Sprite* walkFrame2)
+Enemy::Enemy(float x, float y, float width, float height, float velocityX, const Sprite* walkFrame1, const Sprite* walkFrame2, bool walkFramesFaceRight)
     : GameObject(x, y, width, height),
     walkFrame1(walkFrame1),
-    walkFrame2(walkFrame2)
+    walkFrame2(walkFrame2),
+    walkFramesFaceRight(walkFramesFaceRight)
 {
     SetVelocity(velocityX, 0.0f);
     SetCollidable(true);
@@ -96,11 +98,14 @@ void Enemy::RenderAt(Renderer& renderer, float offsetX, float offsetY)
         return;
     }
 
+    RenderOptions options;
+    options.flipX = walkFramesFaceRight && velocityX < 0.0f;
     renderer.DrawSprite(*frame,
         static_cast<int>(std::lround(x - offsetX)),
         static_cast<int>(std::lround(y - offsetY)),
         static_cast<int>(std::lround(width)),
-        static_cast<int>(std::lround(height)));
+        static_cast<int>(std::lround(height)),
+        options);
 }
 
 void Enemy::Defeat()
