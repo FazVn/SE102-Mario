@@ -53,7 +53,7 @@ public:
 
     static constexpr float PixelToMeter = 31.0f / 600.0f;
     static constexpr float MeterToPixel = 600.0f / 31.0f;
-    static constexpr float Gravity = 9.81f;
+    static constexpr float DefaultGravity = 9.81f;
     static constexpr float MaxRunSpeed = 6.8f;
     static constexpr float RunAcceleration = 3.0f;
     static constexpr float RunDeceleration = 3.0f;
@@ -73,6 +73,9 @@ public:
     void SetOnGround(bool value);
     void Bounce();
     void ResetPowerState();
+    void SetPowerForm(Form newForm);
+    void SetGravity(float newGravity);
+    void Respawn(float newX, float newY, Form newForm, bool wasOnGround);
     void UpgradeWithMushroom();
     bool TakeHit();
     bool CanShootFireball() const;
@@ -93,6 +96,7 @@ public:
     FacingDirection GetFacingDirection() const;
     State GetState() const;
     Form GetPowerForm() const;
+    float GetGravity() const;
     Transformation GetTransformation() const;
     float GetTransformationProgress() const;
     void ActivateStarPower();
@@ -124,4 +128,5 @@ private:
     float transformationTimer = 0.0f;
     float damageInvulnerabilityTimer = 0.0f;
     float shootAnimationTimer = 0.0f;
+    float gravity = DefaultGravity;
 };

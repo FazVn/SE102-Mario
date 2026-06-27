@@ -73,6 +73,18 @@ private:
         bool active = true;
     };
 
+    struct PracticeCheckpoint
+    {
+        bool active = false;
+        float x = 0.0f;
+        float y = 0.0f;
+        Mario::Form form = Mario::Form::Small;
+        bool onGround = false;
+        int score = 0;
+        int coinCount = 0;
+        int timeLeft = 400;
+    };
+
     bool LoadLevelFromFile(const std::wstring& resourceRelativePath);
     void BuildFallbackLevel();
     void ClearLevel();
@@ -93,6 +105,11 @@ private:
     void SpawnFireball();
     void UpdateFireballs(float deltaTime);
     void RenderFireballs(Renderer& renderer);
+    void UpdateDebugMenu(const Input& input);
+    void RenderDebugMenu(Renderer& renderer);
+    void BeginGravityInput();
+    void SavePracticeCheckpoint();
+    bool TryRespawnAtCheckpoint();
     bool UpdateTimer(float deltaTime);
     void UpdateMarioSprite(float deltaTime);
     void RenderSpriteInstance(Renderer& renderer, const SpriteInstance& instance);
@@ -131,4 +148,14 @@ private:
     float lastDeltaTime = 0.0f;
     bool isPaused = false;
     int selectedPause = 0;
+    bool debugMenuOpen = false;
+    int debugMenuSelection = 0;
+    bool debugGravityEditing = false;
+    bool debugGravityInputInvalid = false;
+    std::string debugGravityInput;
+    bool noDeathsOnEnemyCollision = false;
+    bool infiniteTime = false;
+    bool practiceMode = false;
+    PracticeCheckpoint practiceCheckpoint;
+    float checkpointMessageTimer = 0.0f;
 };

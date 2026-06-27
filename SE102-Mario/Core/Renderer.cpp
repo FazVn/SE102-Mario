@@ -296,6 +296,19 @@ void Renderer::DrawSprite(const Sprite& sprite, int x, int y, int destinationWid
     DrawTexture(*texture, x, y, destinationWidth, destinationHeight, sprite.GetSourceRect(), sprite.UsesTransparentColor(), sprite.GetTransparentColor(), options);
 }
 
+void Renderer::DrawFilledRect(int x, int y, int width, int height, COLORREF color)
+{
+    if (!backBufferContext || width <= 0 || height <= 0)
+    {
+        return;
+    }
+
+    RECT rect{ x, y, x + width, y + height };
+    HBRUSH brush = CreateSolidBrush(color);
+    FillRect(backBufferContext, &rect, brush);
+    DeleteObject(brush);
+}
+
 void Renderer::DrawCenteredText(const std::wstring& text, int y, int height, int fontSize, COLORREF color, const wchar_t* fontFamily, int fontWeight)
 {
     HFONT font = CreateRenderFont(fontSize, fontWeight, fontFamily);

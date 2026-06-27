@@ -37,10 +37,11 @@ namespace
         return target;
     }
 
-    float CalculateJumpVelocity(float marioHeightMeters)
+    float CalculateJumpVelocity(float marioHeightMeters, float gravity)
     {
         const float jumpHeight = marioHeightMeters * Mario::JumpHeightMultiplier;
-        return std::sqrt(2.0f * Mario::Gravity * jumpHeight);
+        const float safeGravity = gravity > 0.0f ? gravity : 0.0f;
+        return std::sqrt(2.0f * safeGravity * jumpHeight);
     }
 
     bool HasHorizontalOverlap(const RectF& first, const RectF& second)
@@ -106,7 +107,7 @@ void Mario::SetOnGround(bool value)
 
 void Mario::Bounce()
 {
-    velocityMetersY = -CalculateJumpVelocity(PixelsToMeters(PoweredRenderHeight)) * 0.72f;
+    velocityMetersY = -CalculateJumpVelocity(PixelsToMeters(PoweredRenderHeight), gravity) * 0.72f;
     onGround = false;
     SyncPixelsFromPhysics();
     UpdateState();
@@ -120,7 +121,39 @@ void Mario::ResetPowerState()
     damageInvulnerabilityTimer = 0.0f;
     shootAnimationTimer = 0.0f;
     starPowerTimer = 0.0f;
+    gravity = DefaultGravity;
     SetRenderSize(SmallRenderWidth, SmallRenderHeight);
+}
+
+void Mario::SetPowerForm(Form newForm)
+{
+    ApplyForm(newForm);
+    transformation = Transformation::None;
+    transformationTimer = 0.0f;
+    shootAnimationTimer = 0.0f;
+}
+
+void Mario::SetGravity(float newGravity)
+{
+    if (std::isfinite(newGravity) && newGravity >= 0.0f)
+    {
+        gravity = newGravity;
+    }
+}
+
+void Mario::Respawn(float newX, float newY, Form newForm, bool wasOnGround)
+{
+    SetPowerForm(newForm);
+    SetPosition(newX, newY);
+    velocityMetersX = 0.0f;
+    velocityMetersY = 0.0f;
+    onGround = wasOnGround;
+    starPowerTimer = 0.0f;
+    damageInvulnerabilityTimer = DamageInvulnerabilityDuration;
+    SyncPixelsFromPhysics();
+    previousPixelX = x;
+    previousPixelY = y;
+    UpdateState();
 }
 
 void Mario::UpgradeWithMushroom()
@@ -267,11 +300,11 @@ void Mario::Update(const Input& input, float deltaTime)
 
     if (input.WasKeyPressed(VK_SPACE) && onGround)
     {
-        velocityMetersY = -CalculateJumpVelocity(PixelsToMeters(PoweredRenderHeight));
+        velocityMetersY = -CalculateJumpVelocity(PixelsToMeters(PoweredRenderHeight), gravity);
         onGround = false;
     }
 
-    velocityMetersY += Gravity * deltaTime;
+    velocityMetersY += gravity * deltaTime;
     positionMetersX += velocityMetersX * deltaTime;
     positionMetersY += velocityMetersY * deltaTime;
 
@@ -480,6 +513,11 @@ Mario::State Mario::GetState() const
 Mario::Form Mario::GetPowerForm() const
 {
     return form;
+}
+
+float Mario::GetGravity() const
+{
+    return gravity;
 }
 
 Mario::Transformation Mario::GetTransformation() const

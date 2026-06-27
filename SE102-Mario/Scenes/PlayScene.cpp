@@ -43,6 +43,8 @@ namespace
     constexpr float FireballLifeTime = 2.5f;
     constexpr float FireballFrameDuration = 0.08f;
     constexpr size_t MaximumFireballs = 2;
+    constexpr int DebugMenuItemCount = 5;
+    constexpr float CheckpointMessageDuration = 2.0f;
 
     RectF MakeRect(float x, float y, float width, float height)
     {
@@ -97,6 +99,25 @@ namespace
         stream << std::setfill(L'0') << std::setw(6) << score;
         return stream.str();
     }
+
+    std::wstring MarioFormName(Mario::Form form)
+    {
+        if (form == Mario::Form::Super)
+        {
+            return L"SUPER";
+        }
+        if (form == Mario::Form::Fire)
+        {
+            return L"FIRE";
+        }
+
+        return L"SMALL";
+    }
+
+    std::wstring OnOff(bool value)
+    {
+        return value ? L"ON" : L"OFF";
+    }
 }
 
 PlayScene::PlayScene(TextureManager& textures)
@@ -112,6 +133,16 @@ void PlayScene::Load()
     timeAccumulator = 0.0f;
     isPaused = false;
     selectedPause = 0;
+    debugMenuOpen = false;
+    debugMenuSelection = 0;
+    debugGravityEditing = false;
+    debugGravityInputInvalid = false;
+    debugGravityInput.clear();
+    noDeathsOnEnemyCollision = false;
+    infiniteTime = false;
+    practiceMode = false;
+    practiceCheckpoint = PracticeCheckpoint{};
+    checkpointMessageTimer = 0.0f;
 
     assetsLoaded = spriteManager.LoadFromDefinitionFile(L"definitions/sprites.txt", textureManager);
 
@@ -141,6 +172,20 @@ void PlayScene::Unload()
 void PlayScene::Update(SceneManager& sceneManager, const Input& input, float deltaTime)
 {
     lastDeltaTime = deltaTime;
+
+    if (input.WasKeyPressed(VK_TAB))
+    {
+        debugMenuOpen = !debugMenuOpen;
+        debugGravityEditing = false;
+        debugGravityInputInvalid = false;
+        return;
+    }
+
+    if (debugMenuOpen)
+    {
+        UpdateDebugMenu(input);
+        return;
+    }
 
     if (input.WasKeyPressed('G'))
     {
@@ -197,8 +242,22 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
         return; 
     }
 
+    if (checkpointMessageTimer > 0.0f)
+    {
+        checkpointMessageTimer = std::max(0.0f, checkpointMessageTimer - deltaTime);
+    }
+
+    if (practiceMode && input.WasKeyPressed('S'))
+    {
+        SavePracticeCheckpoint();
+    }
+
     if (UpdateTimer(deltaTime))
     {
+        if (TryRespawnAtCheckpoint())
+        {
+            return;
+        }
         sceneManager.RequestChange(SceneId::GameOver);
         return;
     }
@@ -227,6 +286,10 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
 
     if (UpdateEnemies(physicsDeltaTime))
     {
+        if (TryRespawnAtCheckpoint())
+        {
+            return;
+        }
         sceneManager.RequestChange(SceneId::GameOver);
         return;
     }
@@ -235,6 +298,10 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
 
     if (mario.GetY() > levelHeight + 128.0f)
     {
+        if (TryRespawnAtCheckpoint())
+        {
+            return;
+        }
         sceneManager.RequestChange(SceneId::GameOver);
         return;
     }
@@ -320,6 +387,11 @@ void PlayScene::Render(Renderer& renderer, HWND windowHandle)
     renderer.DrawTextLine(L"WORLD 1-1", 400, 14, 20, RGB(255, 255, 255), marioFontFamily.c_str(), FW_BOLD);
     renderer.DrawTextLine(L"TIME " + std::to_wstring(timeLeft), 680, 14, 20, RGB(255, 255, 255), marioFontFamily.c_str(), FW_BOLD);
 
+    if (checkpointMessageTimer > 0.0f)
+    {
+        renderer.DrawCenteredText(L"CHECKPOINT SAVED", 52, 32, 20, RGB(255, 230, 80), marioFontFamily.c_str(), FW_BOLD);
+    }
+
     if (isPaused)
     {
         renderer.DrawCenteredText(
@@ -339,6 +411,11 @@ void PlayScene::Render(Renderer& renderer, HWND windowHandle)
             renderer.DrawCenteredText(L"> EXIT <", 270, 40, 28, RGB(255, 230, 80));
         else
             renderer.DrawCenteredText(L"EXIT", 270, 40, 28, RGB(180, 180, 180));
+    }
+
+    if (debugMenuOpen)
+    {
+        RenderDebugMenu(renderer);
     }
 
 
@@ -868,7 +945,7 @@ bool PlayScene::UpdateEnemies(float deltaTime)
             }
             else
             {
-                if (mario.TakeHit())
+                if (!noDeathsOnEnemyCollision && mario.TakeHit())
                 {
                     hitMario = true;
                 }
@@ -1077,8 +1154,242 @@ void PlayScene::RenderFireballs(Renderer& renderer)
     }
 }
 
+void PlayScene::UpdateDebugMenu(const Input& input)
+{
+    if (debugGravityEditing)
+    {
+        if (input.WasKeyPressed(VK_ESCAPE))
+        {
+            debugGravityEditing = false;
+            debugGravityInputInvalid = false;
+            return;
+        }
+
+        if (input.WasKeyPressed(VK_BACK) && !debugGravityInput.empty())
+        {
+            debugGravityInput.pop_back();
+            debugGravityInputInvalid = false;
+        }
+
+        for (int key = '0'; key <= '9'; ++key)
+        {
+            if (input.WasKeyPressed(key) && debugGravityInput.size() < 10)
+            {
+                debugGravityInput.push_back(static_cast<char>(key));
+                debugGravityInputInvalid = false;
+            }
+        }
+
+        for (int key = VK_NUMPAD0; key <= VK_NUMPAD9; ++key)
+        {
+            if (input.WasKeyPressed(key) && debugGravityInput.size() < 10)
+            {
+                debugGravityInput.push_back(static_cast<char>('0' + key - VK_NUMPAD0));
+                debugGravityInputInvalid = false;
+            }
+        }
+
+        const bool decimalPressed = input.WasKeyPressed(VK_OEM_PERIOD) || input.WasKeyPressed(VK_DECIMAL);
+        if (decimalPressed && debugGravityInput.find('.') == std::string::npos && debugGravityInput.size() < 10)
+        {
+            debugGravityInput += debugGravityInput.empty() ? "0." : ".";
+            debugGravityInputInvalid = false;
+        }
+
+        if (input.WasKeyPressed(VK_RETURN))
+        {
+            try
+            {
+                size_t parsedCharacters = 0;
+                const float value = std::stof(debugGravityInput, &parsedCharacters);
+                if (parsedCharacters == debugGravityInput.size() && std::isfinite(value) && value >= 0.0f)
+                {
+                    mario.SetGravity(value);
+                    debugGravityEditing = false;
+                    debugGravityInputInvalid = false;
+                }
+                else
+                {
+                    debugGravityInputInvalid = true;
+                }
+            }
+            catch (...)
+            {
+                debugGravityInputInvalid = true;
+            }
+        }
+
+        return;
+    }
+
+    if (input.WasKeyPressed(VK_ESCAPE))
+    {
+        debugMenuOpen = false;
+        return;
+    }
+
+    if (input.WasKeyPressed(VK_UP))
+    {
+        debugMenuSelection = (debugMenuSelection + DebugMenuItemCount - 1) % DebugMenuItemCount;
+    }
+    if (input.WasKeyPressed(VK_DOWN))
+    {
+        debugMenuSelection = (debugMenuSelection + 1) % DebugMenuItemCount;
+    }
+
+    const bool leftPressed = input.WasKeyPressed(VK_LEFT);
+    const bool rightPressed = input.WasKeyPressed(VK_RIGHT);
+    const bool enterPressed = input.WasKeyPressed(VK_RETURN);
+    if (!leftPressed && !rightPressed && !enterPressed)
+    {
+        return;
+    }
+
+    switch (debugMenuSelection)
+    {
+    case 0:
+        noDeathsOnEnemyCollision = !noDeathsOnEnemyCollision;
+        break;
+
+    case 1:
+        if (enterPressed)
+        {
+            BeginGravityInput();
+        }
+        break;
+
+    case 2:
+        infiniteTime = !infiniteTime;
+        break;
+
+    case 3:
+    {
+        const int direction = leftPressed ? -1 : 1;
+        const int currentForm = static_cast<int>(mario.GetPowerForm());
+        const int formCount = 3;
+        const int nextForm = (currentForm + direction + formCount) % formCount;
+        mario.SetPowerForm(static_cast<Mario::Form>(nextForm));
+        UpdateMarioSprite(0.0f);
+        break;
+    }
+
+    case 4:
+        practiceMode = !practiceMode;
+        if (!practiceMode)
+        {
+            practiceCheckpoint = PracticeCheckpoint{};
+            checkpointMessageTimer = 0.0f;
+        }
+        break;
+
+    default:
+        break;
+    }
+}
+
+void PlayScene::RenderDebugMenu(Renderer& renderer)
+{
+    renderer.DrawFilledRect(105, 48, 590, 380, RGB(18, 20, 32));
+    renderer.DrawCenteredText(L"DEBUG / CHEATS", 62, 44, 30, RGB(255, 230, 80), marioFontFamily.c_str(), FW_BOLD);
+
+    std::wostringstream gravityText;
+    gravityText << std::fixed << std::setprecision(2) << mario.GetGravity();
+
+    std::wstring gravityValue = gravityText.str();
+    if (debugGravityEditing)
+    {
+        gravityValue.assign(debugGravityInput.begin(), debugGravityInput.end());
+        gravityValue = L"[" + gravityValue + L"_]";
+        if (debugGravityInputInvalid)
+        {
+            gravityValue += L"  INVALID (>= 0)";
+        }
+    }
+
+    const std::wstring checkpointStatus = practiceCheckpoint.active ? L" / CHECKPOINT SET" : L"";
+    const std::wstring rows[DebugMenuItemCount] = {
+        L"No deaths on collide: " + OnOff(noDeathsOnEnemyCollision),
+        L"Gravity modifier: " + gravityValue + L" m/s^2",
+        L"Infinite time: " + OnOff(infiniteTime),
+        L"Set Mario state: " + MarioFormName(mario.GetPowerForm()),
+        L"Practice Mode: " + OnOff(practiceMode) + checkpointStatus
+    };
+
+    for (int index = 0; index < DebugMenuItemCount; ++index)
+    {
+        const bool selected = index == debugMenuSelection;
+        const std::wstring line = (selected ? L"> " : L"  ") + rows[index] + (selected ? L" <" : L"");
+        const COLORREF color = selected ? RGB(255, 230, 80) : RGB(230, 230, 230);
+        renderer.DrawTextLine(line, 145, 125 + index * 48, 21, color, marioFontFamily.c_str(), FW_BOLD);
+    }
+
+    const std::wstring instructions = debugGravityEditing
+        ? L"TYPE NUMBER | ENTER APPLY | ESC CANCEL"
+        : L"UP/DOWN SELECT | LEFT/RIGHT/ENTER CHANGE | TAB CLOSE";
+    renderer.DrawCenteredText(instructions, 375, 32, 17, RGB(170, 190, 220), marioFontFamily.c_str(), FW_NORMAL);
+}
+
+void PlayScene::BeginGravityInput()
+{
+    std::ostringstream stream;
+    stream << std::fixed << std::setprecision(2) << mario.GetGravity();
+    debugGravityInput = stream.str();
+
+    while (debugGravityInput.size() > 1 && debugGravityInput.back() == '0')
+    {
+        debugGravityInput.pop_back();
+    }
+    if (!debugGravityInput.empty() && debugGravityInput.back() == '.')
+    {
+        debugGravityInput.pop_back();
+    }
+
+    debugGravityEditing = true;
+    debugGravityInputInvalid = false;
+}
+
+void PlayScene::SavePracticeCheckpoint()
+{
+    practiceCheckpoint.active = true;
+    practiceCheckpoint.x = mario.GetX();
+    practiceCheckpoint.y = mario.GetY();
+    practiceCheckpoint.form = mario.GetPowerForm();
+    practiceCheckpoint.onGround = mario.IsOnGround();
+    practiceCheckpoint.score = score;
+    practiceCheckpoint.coinCount = coinCount;
+    practiceCheckpoint.timeLeft = timeLeft;
+    checkpointMessageTimer = CheckpointMessageDuration;
+}
+
+bool PlayScene::TryRespawnAtCheckpoint()
+{
+    if (!practiceMode || !practiceCheckpoint.active)
+    {
+        return false;
+    }
+
+    score = practiceCheckpoint.score;
+    coinCount = practiceCheckpoint.coinCount;
+    timeLeft = std::max(1, practiceCheckpoint.timeLeft);
+    timeAccumulator = 0.0f;
+    fireballs.clear();
+    mario.Respawn(
+        practiceCheckpoint.x,
+        practiceCheckpoint.y,
+        practiceCheckpoint.form,
+        practiceCheckpoint.onGround);
+    UpdateCamera();
+    UpdateMarioSprite(0.0f);
+    return true;
+}
+
 bool PlayScene::UpdateTimer(float deltaTime)
 {
+    if (infiniteTime)
+    {
+        return false;
+    }
+
     if (timeLeft <= 0)
     {
         return true;
