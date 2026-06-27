@@ -32,7 +32,7 @@ void GameObject::Update(float deltaTime)
 void GameObject::Render(Renderer&)
 {
     // Base object does not know how it should look.
-    // Derived classes such as Mario, Brick, Platform, ... will override this.
+    // Derived classes such as Mario and item objects will override this.
 }
 
 void GameObject::OnCollision(GameObject&)

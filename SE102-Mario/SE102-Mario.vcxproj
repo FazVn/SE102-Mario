@@ -55,10 +55,7 @@
   <ItemGroup>
     <None Include="Resources\definitions\textures.txt" />
     <None Include="Resources\definitions\sprites.txt" />
-    <None Include="Resources\definitions\animations.txt" />
-    <None Include="Resources\levels\demo_level.txt" />
     <None Include="Resources\levels\level_1_1.txt" />
-    <None Include="Resources\textures\.gitkeep" />
     <None Include="Tests\test_cases.md" />
     <None Include="Tests\known_bugs.md" />
   </ItemGroup>
@@ -148,33 +145,22 @@
     <ClCompile Include="Scenes\SceneFactory.cpp" />
     <ClCompile Include="Scenes\SceneManager.cpp" />
     <ClCompile Include="Objects\GameObject.cpp" />
-    <ClCompile Include="World\Level.cpp" />
     <ClCompile Include="Core\Camera.cpp" />
     <ClCompile Include="Core\Texture.cpp" />
     <ClCompile Include="Core\Sprite.cpp" />
-    <ClCompile Include="Core\Animation.cpp" />
     <ClCompile Include="Core\AssetPaths.cpp" />
     <ClCompile Include="Core\TextureManager.cpp" />
     <ClCompile Include="Core\SpriteManager.cpp" />
     <ClCompile Include="Core\FontManager.cpp" />
     <ClCompile Include="Scenes\WinScene.cpp" />
-    <ClCompile Include="World\LevelLoader.cpp" />
-    <ClCompile Include="World\TileMap.cpp" />
-    <ClCompile Include="World\EntityManager.cpp" />
-    <ClCompile Include="World\ObjectFactory.cpp" />
-    <ClCompile Include="World\CollisionSystem.cpp" />
     <ClCompile Include="Objects\Player\Mario.cpp" />
     <ClCompile Include="Objects\Enemies\Enemy.cpp" />
     <ClCompile Include="Objects\Enemies\Goomba.cpp" />
     <ClCompile Include="Objects\Enemies\Koopa.cpp" />
-    <ClCompile Include="Objects\Blocks\Brick.cpp" />
     <ClCompile Include="Objects\Blocks\QuestionBlock.cpp" />
     <ClCompile Include="Objects\Items\Coin.cpp" />
     <ClCompile Include="Objects\Items\Mushroom.cpp" />
     <ClCompile Include="Objects\Items\Star.cpp" />
-    <ClCompile Include="Objects\Environment\Platform.cpp" />
-    <ClCompile Include="Objects\Environment\Pipe.cpp" />
-    <ClCompile Include="Objects\Environment\Portal.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Game.h" />
@@ -190,34 +176,23 @@
     <ClInclude Include="Scenes\SceneId.h" />
     <ClInclude Include="Scenes\SceneManager.h" />
     <ClInclude Include="Objects\GameObject.h" />
-    <ClInclude Include="World\Level.h" />
     <ClInclude Include="Core\RenderOptions.h" />
     <ClInclude Include="Core\Camera.h" />
     <ClInclude Include="Core\Texture.h" />
     <ClInclude Include="Core\Sprite.h" />
-    <ClInclude Include="Core\Animation.h" />
     <ClInclude Include="Core\AssetPaths.h" />
     <ClInclude Include="Core\TextureManager.h" />
     <ClInclude Include="Core\SpriteManager.h" />
     <ClInclude Include="Core\FontManager.h" />
     <ClInclude Include="Scenes\WinScene.h" />
-    <ClInclude Include="World\LevelLoader.h" />
-    <ClInclude Include="World\TileMap.h" />
-    <ClInclude Include="World\EntityManager.h" />
-    <ClInclude Include="World\ObjectFactory.h" />
-    <ClInclude Include="World\CollisionSystem.h" />
     <ClInclude Include="Objects\Player\Mario.h" />
     <ClInclude Include="Objects\Enemies\Enemy.h" />
     <ClInclude Include="Objects\Enemies\Goomba.h" />
     <ClInclude Include="Objects\Enemies\Koopa.h" />
-    <ClInclude Include="Objects\Blocks\Brick.h" />
     <ClInclude Include="Objects\Blocks\QuestionBlock.h" />
     <ClInclude Include="Objects\Items\Coin.h" />
     <ClInclude Include="Objects\Items\Mushroom.h" />
     <ClInclude Include="Objects\Items\Star.h" />
-    <ClInclude Include="Objects\Environment\Platform.h" />
-    <ClInclude Include="Objects\Environment\Pipe.h" />
-    <ClInclude Include="Objects\Environment\Portal.h" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Resources\fonts\SS-Mario-Regular.otf" />

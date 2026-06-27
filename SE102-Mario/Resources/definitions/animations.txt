@@ -1,4 +1,0 @@
-# Reserved format for the next step:
-# animation_id loop sprite_id:duration_seconds sprite_id:duration_seconds ...
-# Example:
-# mario.small.idle true mario.small.stand:0.25
