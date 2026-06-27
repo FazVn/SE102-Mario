@@ -651,8 +651,8 @@ void PlayScene::AddEnemy(const std::string& enemyType, float x, float y)
         enemies.push_back(std::make_unique<Koopa>(
             x,
             y,
-            spriteManager.Get("enemy.koopa.walk1"),
-            spriteManager.Get("enemy.koopa.walk2")));
+            spriteManager.Get("enemy.koopa.green.walk1"),
+            spriteManager.Get("enemy.koopa.green.walk2")));
     }
     else
     {

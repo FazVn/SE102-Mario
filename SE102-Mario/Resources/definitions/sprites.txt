@@ -75,10 +75,10 @@ mario.fire.shoot mario 919 77 938 107 auto # shooting fireball (right facing)
 enemy.goomba.walk1 enemies 1 45 16 60 auto # left facing
 enemy.goomba.walk2 enemies 18 45 33 60 auto # right facing
 enemy.goomba.squashed enemies 35 45 50 60 auto
-##	 koopa (walking animation: walk1 -> walk2 -> walk1 -> walk2 -> ....)
-enemy.koopa.walk1 enemies 52 37 67 60 auto # frame 1 of walking animation (right facing)
-enemy.koopa.walk2 enemies 69 37 84 60 auto # frame 2 of walking animation (right facing)
-enemy.koopa.shell enemies 120 45 135 60 auto # koopa shell
+##	 green koopa (walking animation: walk1 -> walk2 -> walk1 -> walk2 -> ....)
+enemy.koopa.green.walk1 enemies 52 37 67 60 auto # frame 1 of walking animation (right facing)
+enemy.koopa.green.walk2 enemies 69 37 84 60 auto # frame 2 of walking animation (right facing)
+enemy.koopa.green.shell enemies 120 45 135 60 auto # koopa shell
 #	 blocks
 ##	 brick blocks
 block.gold.tanborder.brick items_blocks 36 113 52 129 none
