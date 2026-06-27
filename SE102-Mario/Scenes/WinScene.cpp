@@ -3,7 +3,24 @@
 #include "../Core/Input.h"
 #include "../Core/Renderer.h"
 #include "SceneManager.h"
+#include <iomanip>
+#include <sstream>
 #include <windows.h> 
+
+namespace
+{
+    std::wstring FormatScore(int score)
+    {
+        std::wostringstream stream;
+        stream << std::setfill(L'0') << std::setw(6) << score;
+        return stream.str();
+    }
+}
+
+WinScene::WinScene(int score)
+    : score(score)
+{
+}
 
 void WinScene::Update(SceneManager& sceneManager, const Input& input, float)
 {
@@ -50,6 +67,13 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
         42,
         RGB(100, 255, 150));
 
+    renderer.DrawCenteredText(
+        L"SCORE  " + FormatScore(score),
+        125,
+        40,
+        28,
+        RGB(255, 255, 255));
+
     //-----------------------------------
     // NEXT LEVEL / RESTART
     //-----------------------------------
@@ -57,7 +81,7 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
     {
         renderer.DrawCenteredText(
             L"> RESTART <",
-            170,
+            185,
             40,
             28,
             RGB(255, 230, 80));
@@ -66,7 +90,7 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
     {
         renderer.DrawCenteredText(
             L"RESTART",
-            170,
+            185,
             40,
             28,
             RGB(180, 180, 180));
@@ -79,7 +103,7 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
     {
         renderer.DrawCenteredText(
             L"> RETURN TO MENU <",
-            220,
+            235,
             40,
             28,
             RGB(255, 230, 80));
@@ -88,7 +112,7 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
     {
         renderer.DrawCenteredText(
             L"RETURN TO MENU",
-            220,
+            235,
             40,
             28,
             RGB(180, 180, 180));
@@ -101,7 +125,7 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
     {
         renderer.DrawCenteredText(
             L"> EXIT <",
-            270,
+            285,
             40,
             28,
             RGB(255, 230, 80));
@@ -110,7 +134,7 @@ void WinScene::Render(Renderer& renderer, HWND windowHandle)
     {
         renderer.DrawCenteredText(
             L"EXIT",
-            270,
+            285,
             40,
             28,
             RGB(180, 180, 180));

@@ -149,7 +149,7 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
     }
 
     if (input.WasKeyPressed('H'))
-        sceneManager.RequestChange(SceneId::Win);
+        sceneManager.RequestChange(SceneId::Win, score);
 
     if (input.WasKeyPressed(VK_ESCAPE))
     {
@@ -231,7 +231,7 @@ void PlayScene::Update(SceneManager& sceneManager, const Input& input, float del
     if (winBounds.Width() > 0.0f && winBounds.Height() > 0.0f && mario.GetBoundingBox().Intersects(winBounds))
     {
         AwardTimeBonus();
-        sceneManager.RequestChange(SceneId::Win);
+        sceneManager.RequestChange(SceneId::Win, score);
         return;
     }
 

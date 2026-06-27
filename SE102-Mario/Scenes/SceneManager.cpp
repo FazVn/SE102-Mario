@@ -8,9 +8,10 @@ void SceneManager::SetFactory(std::unique_ptr<SceneFactory> newFactory)
     factory = std::move(newFactory);
 }
 
-void SceneManager::RequestChange(SceneId sceneId)
+void SceneManager::RequestChange(SceneId sceneId, int score)
 {
     pendingScene = sceneId;
+    pendingScore = score;
 }
 
 void SceneManager::ApplyPendingChange()
@@ -25,9 +26,10 @@ void SceneManager::ApplyPendingChange()
         currentScene->Unload();
     }
 
-    currentScene = factory->Create(*pendingScene);
+    currentScene = factory->Create(*pendingScene, pendingScore);
     currentScene->Load();
     pendingScene.reset();
+    pendingScore = 0;
 }
 
 void SceneManager::Update(const Input& input, float deltaTime)

@@ -16,7 +16,7 @@ class SceneManager
 {
 public:
     void SetFactory(std::unique_ptr<SceneFactory> newFactory);
-    void RequestChange(SceneId sceneId);
+    void RequestChange(SceneId sceneId, int score = 0);
     void ApplyPendingChange();
 
     void Update(const Input& input, float deltaTime);
@@ -29,6 +29,7 @@ private:
     std::unique_ptr<SceneFactory> factory;
     std::unique_ptr<IScene> currentScene;
     std::optional<SceneId> pendingScene;
+    int pendingScore = 0;
 
     TextureManager* textureManager = nullptr;
 };

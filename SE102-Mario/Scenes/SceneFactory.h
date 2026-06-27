@@ -12,7 +12,7 @@ class SceneFactory
 public:
     explicit SceneFactory(TextureManager& textures);
 
-    std::unique_ptr<IScene> Create(SceneId sceneId) const;
+    std::unique_ptr<IScene> Create(SceneId sceneId, int score = 0) const;
 
 private:
     TextureManager& textureManager;

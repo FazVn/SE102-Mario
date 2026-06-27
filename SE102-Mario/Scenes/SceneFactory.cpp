@@ -13,7 +13,7 @@ SceneFactory::SceneFactory(TextureManager& textures)
 {
 }
 
-std::unique_ptr<IScene> SceneFactory::Create(SceneId sceneId) const
+std::unique_ptr<IScene> SceneFactory::Create(SceneId sceneId, int score) const
 {
     switch (sceneId)
     {
@@ -30,7 +30,7 @@ std::unique_ptr<IScene> SceneFactory::Create(SceneId sceneId) const
         return std::make_unique<GameOverScene>();
 
     case SceneId::Win:
-        return std::make_unique<WinScene>();
+        return std::make_unique<WinScene>(score);
 
     default:
         return std::make_unique<MenuScene>(textureManager);
