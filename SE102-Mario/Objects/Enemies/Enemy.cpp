@@ -12,6 +12,9 @@ namespace
     constexpr float WalkFrameDuration = 0.16f;
     constexpr float LedgeProbeDistance = 2.0f;
     constexpr float GroundProbeTolerance = 4.0f;
+    constexpr float ShellHeight = 32.0f;
+    constexpr float ShellMoveSpeed = 240.0f;
+    constexpr float StationarySpeed = 0.01f;
 
     bool HasHorizontalOverlap(const RectF& first, const RectF& second)
     {
@@ -35,10 +38,11 @@ namespace
 }
 
 Enemy::Enemy(float x, float y, float width, float height, float velocityX, const Sprite* walkFrame1, const Sprite* walkFrame2,
-    bool walkFramesFaceRight, bool turnAroundAtLedges)
+    bool walkFramesFaceRight, bool turnAroundAtLedges, const Sprite* shellFrame)
     : GameObject(x, y, width, height),
     walkFrame1(walkFrame1),
     walkFrame2(walkFrame2),
+    shellFrame(shellFrame),
     walkFramesFaceRight(walkFramesFaceRight),
     turnAroundAtLedges(turnAroundAtLedges)
 {
@@ -55,7 +59,7 @@ void Enemy::Update(float deltaTime, const std::vector<RectF>& solidBounds, float
 
     animationTime += deltaTime;
 
-    if (turnAroundAtLedges && std::abs(velocityY) <= GroundProbeTolerance && velocityX != 0.0f)
+    if (turnAroundAtLedges && !isInShell && std::abs(velocityY) <= GroundProbeTolerance && velocityX != 0.0f)
     {
         const RectF currentBounds = GetBoundingBox();
         bool isStandingOnGround = false;
@@ -145,7 +149,7 @@ void Enemy::RenderAt(Renderer& renderer, float offsetX, float offsetY)
     }
 
     RenderOptions options;
-    options.flipX = walkFramesFaceRight && velocityX < 0.0f;
+    options.flipX = !isInShell && walkFramesFaceRight && velocityX < 0.0f;
     renderer.DrawSprite(*frame,
         static_cast<int>(std::lround(x - offsetX)),
         static_cast<int>(std::lround(y - offsetY)),
@@ -159,8 +163,61 @@ void Enemy::Defeat()
     SetActive(false);
 }
 
+bool Enemy::Stomp()
+{
+    if (!IsActive())
+    {
+        return false;
+    }
+
+    if (!shellFrame)
+    {
+        Defeat();
+        return true;
+    }
+
+    if (!isInShell)
+    {
+        const float previousBottom = y + height;
+        isInShell = true;
+        SetSize(width, ShellHeight);
+        SetPosition(x, previousBottom - height);
+        SetVelocity(0.0f, 0.0f);
+        return true;
+    }
+
+    if (std::abs(velocityX) > StationarySpeed)
+    {
+        velocityX = 0.0f;
+        return true;
+    }
+
+    return false;
+}
+
+bool Enemy::CanBeKicked() const
+{
+    return IsActive() && isInShell && std::abs(velocityX) <= StationarySpeed;
+}
+
+bool Enemy::KickShell(float direction)
+{
+    if (!CanBeKicked() || direction == 0.0f)
+    {
+        return false;
+    }
+
+    velocityX = direction < 0.0f ? -ShellMoveSpeed : ShellMoveSpeed;
+    return true;
+}
+
 const Sprite* Enemy::GetCurrentFrame() const
 {
+    if (isInShell && shellFrame)
+    {
+        return shellFrame;
+    }
+
     const Sprite* frame = (static_cast<int>(animationTime / WalkFrameDuration) % 2 == 0)
         ? walkFrame1
         : walkFrame2;

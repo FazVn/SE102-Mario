@@ -39,6 +39,7 @@ namespace
     constexpr int EnemyScore = 100;
     constexpr int PowerUpScore = 1000;
     constexpr float EnemyActivationMargin = 96.0f;
+    constexpr float ShellKickSeparation = 2.0f;
 
     RectF MakeRect(float x, float y, float width, float height)
     {
@@ -654,6 +655,7 @@ void PlayScene::AddEnemy(const std::string& enemyType, float x, float y)
             y,
             spriteManager.Get("enemy.koopa." + koopaColor + ".walk1"),
             spriteManager.Get("enemy.koopa." + koopaColor + ".walk2"),
+            spriteManager.Get("enemy.koopa." + koopaColor + ".shell"),
             enemyType == "RED_KOOPA"));
     }
     else
@@ -752,6 +754,28 @@ void PlayScene::OnEnemyDefeated(Enemy& enemy)
     AddScore(EnemyScore);
 }
 
+void PlayScene::OnEnemyStomped(Enemy& enemy)
+{
+    if (enemy.Stomp())
+    {
+        AddScore(EnemyScore);
+    }
+}
+
+void PlayScene::OnShellKicked(Enemy& enemy, float direction, const RectF& marioBounds)
+{
+    if (!enemy.KickShell(direction))
+    {
+        return;
+    }
+
+    const float shellX = direction < 0.0f
+        ? marioBounds.left - enemy.GetWidth() - ShellKickSeparation
+        : marioBounds.right + ShellKickSeparation;
+    enemy.SetPosition(shellX, enemy.GetY());
+    AddScore(EnemyScore);
+}
+
 void PlayScene::AwardTimeBonus()
 {
     int bonus = 0;
@@ -820,8 +844,15 @@ bool PlayScene::UpdateEnemies(float deltaTime)
             const bool stomped = mario.GetVelocityY() > 0.0f && marioBounds.bottom <= enemyBounds.top + 16.0f;
             if (stomped)
             {
-                OnEnemyDefeated(*enemy);
+                OnEnemyStomped(*enemy);
                 mario.Bounce();
+            }
+            else if (enemy->CanBeKicked())
+            {
+                const float marioCenterX = (marioBounds.left + marioBounds.right) * 0.5f;
+                const float enemyCenterX = (enemyBounds.left + enemyBounds.right) * 0.5f;
+                const float kickDirection = marioCenterX < enemyCenterX ? 1.0f : -1.0f;
+                OnShellKicked(*enemy, kickDirection, marioBounds);
             }
             else
             {

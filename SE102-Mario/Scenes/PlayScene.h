@@ -38,6 +38,8 @@ public:
     void AddScore(int amount);
     void AddCoin();
     void OnEnemyDefeated(Enemy& enemy);
+    void OnEnemyStomped(Enemy& enemy);
+    void OnShellKicked(Enemy& enemy, float direction, const RectF& marioBounds);
     void AwardTimeBonus();
 
 private:
